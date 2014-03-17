@@ -2,44 +2,12 @@ class AccountsController < ApplicationController
   skip_before_filter :authentication, :configure_api
 
   def install
-    logger.info '[insales_app_core] AccountsController#install'
-    logger.info "[insales_app_core] shop: #{params[:shop]}"
-    logger.info "[insales_app_core] token: #{params[:token]}"
-    logger.info "[insales_app_core] insales_id: #{params[:insales_id]}"
-
-    InsalesApi::App.api_key = ENV['INSALES_API_KEY']
-    InsalesApi::App.api_secret = ENV['INSALES_API_SECRET']
-    InsalesApi::App.api_host = ENV['INSALES_API_HOST']
-    InsalesApi::App.api_autologin_path = ENV['INSALES_API_AUTOLOGIN_PATH']
-
-    shop = InsalesApi::App.prepare_shop(params[:shop])
-    password = InsalesApi::App.password_by_token(params[:token])
-    insales_id = params[:insales_id]
-
-    Account.create! do |a|
-      a.insales_subdomain = shop
-      a.insales_password = password
-      a.insales_id = insales_id
-    end
-
+    Account.create_by_insales_request! params
     render nothing: true, status: 200
   end
 
   def uninstall
-    logger.info '[insales_app_core] AccountsController#uninstall'
-    logger.info "[insales_app_core] shop: #{params[:shop]}"
-    logger.info "[insales_app_core] token: #{params[:token]}"
-
-    InsalesApi::App.api_key = ENV['INSALES_API_KEY']
-    InsalesApi::App.api_secret = ENV['INSALES_API_SECRET']
-    InsalesApi::App.api_host = ENV['INSALES_API_HOST']
-    InsalesApi::App.api_autologin_path = ENV['INSALES_API_AUTOLOGIN_PATH']
-
-    shop = InsalesApi::App.prepare_shop(params[:shop])
-    password = params[:token]
-
-    Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
-
+    Account.destroy_by_insales_request! params
     render nothing: true, status: 200
   end
 end
