@@ -17,7 +17,7 @@ class AccountsController < ApplicationController
       a.insales_id = insales_id
     end
 
-    render nothing: true, status: :created
+    render nothing: true, status: :success
   end
 
   def uninstall
