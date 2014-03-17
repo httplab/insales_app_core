@@ -7,6 +7,11 @@ class AccountsController < ApplicationController
     logger.info "[insales_app_core] token: #{params[:token]}"
     logger.info "[insales_app_core] insales_id: #{params[:insales_id]}"
 
+    InsalesApi::App.api_key = ENV['INSALES_API_KEY']
+    InsalesApi::App.api_secret = ENV['INSALES_API_SECRET']
+    InsalesApi::App.api_host = ENV['INSALES_API_HOST']
+    InsalesApi::App.api_autologin_path = ENV['INSALES_API_AUTOLOGIN_PATH']
+
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = InsalesApi::App.password_by_token(params[:token])
     insales_id = params[:insales_id]
@@ -25,10 +30,15 @@ class AccountsController < ApplicationController
     logger.info "[insales_app_core] shop: #{params[:shop]}"
     logger.info "[insales_app_core] token: #{params[:token]}"
 
+    InsalesApi::App.api_key = ENV['INSALES_API_KEY']
+    InsalesApi::App.api_secret = ENV['INSALES_API_SECRET']
+    InsalesApi::App.api_host = ENV['INSALES_API_HOST']
+    InsalesApi::App.api_autologin_path = ENV['INSALES_API_AUTOLOGIN_PATH']
+
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = params[:token]
 
-    # Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
+    Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
 
     render nothing: true, status: 200
   end
