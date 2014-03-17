@@ -17,7 +17,7 @@ class AccountsController < ApplicationController
       a.insales_id = insales_id
     end
 
-    render nothing: true, status: :success
+    render nothing: true, status: 200
   end
 
   def uninstall
@@ -28,8 +28,8 @@ class AccountsController < ApplicationController
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = params[:token]
 
-    Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
+    # Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
 
-    render nothing: true, status: :success
+    render nothing: true, status: 200
   end
 end
