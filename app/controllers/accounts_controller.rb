@@ -1,5 +1,5 @@
 class AccountsController < ApplicationController
-  skip_before_filter :authentication, :configure_api
+  skip_before_filter :authenticate, :configure_api, :store_after_sign_in_location
 
   def install
     Account.create_by_insales_request! params

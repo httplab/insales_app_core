@@ -1,0 +1,32 @@
+doctype html
+
+html
+  head
+    title = render_title
+    = stylesheet_link_tag 'application'
+    = javascript_include_tag 'application'
+    = csrf_meta_tags
+
+  body
+    #navbar
+      nav.navbar.navbar-inverse.navbar-fixed-top role='navigation'
+        .container-fluid
+          .navbar-header
+            a.navbar-brand = app_name
+
+          ul.nav.navbar-nav.navbar-right
+            li: p.navbar-text = current_account.insales_subdomain
+            li = link_to 'Настройки', '#'
+            li = link_to 'Выйти', session_path, method: :delete
+
+    #main-menu
+      .container-fluid
+        ul.nav.nav-tabs
+          = active_link_to root_path, wrap_tag: :li, active: :exclusive do
+            span.glyphicon.glyphicon-home
+          = active_link_to 'Заказы', orders_path, wrap_tag: :li, active: :exclusive
+          = active_link_to 'Заказы', '#', wrap_tag: :li, active: :exclusive
+
+    #page-content
+      .container-fluid
+        = yield
