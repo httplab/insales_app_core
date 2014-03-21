@@ -19,4 +19,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'insales_api'
   s.add_dependency 'active_link_to'
   s.add_dependency 'slim-rails'
+  s.add_dependency 'styx'
 end
