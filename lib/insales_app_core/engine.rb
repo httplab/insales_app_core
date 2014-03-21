@@ -20,10 +20,18 @@ module InsalesAppCore
     end
 
     config.to_prepare do
+
       ActiveSupport.on_load :action_controller do
         ApplicationController.send :include, ControllerExtensions::Authorization
         ApplicationController.send :include, ControllerExtensions::Styx
       end
+
+      ActiveSupport.on_load(:active_record) do
+        ActiveRecord::Base.send(:include, ModelExtensions::InsalesEntity)
+      end
+
     end
+
+
   end
 end
