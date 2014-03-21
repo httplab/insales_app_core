@@ -25,7 +25,6 @@ class Account < ActiveRecord::Base
     InsalesApi::App.new(insales_subdomain, insales_password)
   end
 
-
   def configure_api
     app = create_app
     app.configure_api

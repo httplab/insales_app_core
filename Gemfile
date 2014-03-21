@@ -1,11 +1,12 @@
 source "https://rubygems.org"
 
-# Declare your gem's dependencies in insales_app_core.gemspec.
-# Bundler will treat runtime dependencies like base dependencies, and
-# development dependencies will be added by default to the :development group.
 gemspec
 
-# Declare any dependencies that are still in development here instead of in
-# your gemspec. These might include edge Rails or gems from your path or
-# Git. Remember to move these dependencies to your gemspec before releasing
-# your gem to rubygems.org.
+gem 'sass-rails', '~> 4.0.2'
+gem 'jquery-rails'
+gem 'coffee-rails', '~> 4.0.0'
+
+gem 'awesome_print'
+gem 'rspec-rails'
+gem 'factory_girl_rails'
+gem 'sqlite3'
