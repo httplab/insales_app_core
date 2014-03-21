@@ -8,4 +8,19 @@ class InsalesAppCore::InstallGenerator < Rails::Generators::Base
   def configuration
     copy_file 'insales_app_core.rb', 'config/initializers/insales_app_core.rb'
   end
+
+  def add_assets
+    inject_into_file "app/assets/javascripts/application.js", after: "//= require jquery_ujs\n" do
+      <<-EOF.strip_heredoc
+        //= require insales_app_core
+      EOF
+    end
+
+    inject_into_file "app/assets/stylesheets/application.css.scss",
+                     after: " */\n" do
+      <<-EOF.strip_heredoc
+        @import "insales_app_core";
+      EOF
+    end
+  end
 end
