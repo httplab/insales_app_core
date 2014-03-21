@@ -20,5 +20,15 @@ class Account < ActiveRecord::Base
 
     Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
   end
+
+  def create_app
+    InsalesApi::App.new(insales_subdomain, insales_password)
+  end
+
+
+  def configure_api
+    app = create_app
+    app.configure_api
+  end
 end
 

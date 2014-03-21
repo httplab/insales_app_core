@@ -49,7 +49,7 @@ module InsalesAppCore
         end
 
         return nil unless @current_account
-        self.current_insales_app = InsalesApi::App.new(current_account.insales_subdomain, current_account.insales_password)
+        self.current_insales_app = current_account.create_app
       end
 
       def enter_from_different_shop?
