@@ -24,5 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'unicode'
   s.add_dependency 'nokogiri'
   s.add_dependency 'kaminari'
+  s.add_dependency 'colorize'
   s.add_dependency 'bootstrap-sass', '~> 3.1.1'
 end
