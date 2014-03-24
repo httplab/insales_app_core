@@ -23,7 +23,12 @@ module InsalesAppCore
       module ClassMethods
 
         def maps_to_insales
+          @maps_to_insales = true
           map_insales_fields(id: :insales_id)
+        end
+
+        def ids_map
+          Hash[pluck(:insales_id, :id)]
         end
 
         def create_by_insales_entity(insales_entity, attributes = {})
@@ -38,7 +43,7 @@ module InsalesAppCore
         end
 
         def update_or_create_by_insales_entity(insales_entity, attributes = {})
-          update_by_insales_entity(insales_entity, attributes) || create_by_insales_entity(insales_entity, attributes = {})
+          update_by_insales_entity(insales_entity, attributes) || create_by_insales_entity(insales_entity, attributes)
         end
 
         def get_local_field(insales_field)

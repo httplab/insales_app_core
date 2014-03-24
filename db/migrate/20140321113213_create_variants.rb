@@ -1,7 +1,7 @@
 class CreateVariants < ActiveRecord::Migration
   def change
     create_table :variants do |t|
-      t.string :title, null: false
+      t.string :title
       t.string :sku, null: false
       t.integer :insales_id, null: false
       t.integer :product_id, null: false

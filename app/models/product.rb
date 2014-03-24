@@ -1,5 +1,8 @@
 class Product < ActiveRecord::Base
-  validates :account_id, :insales_id, :title, :available, :is_hidden, presence: true
+  validates :account_id, :insales_id, :title, presence: true
+  # Рельса неважно валидирует булевские значения
+  # false.blank? == true
+  validates :available, :is_hidden, inclusion: [true, false]
   belongs_to :category
   belongs_to :account
   has_many :variants
