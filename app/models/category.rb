@@ -3,7 +3,5 @@ class Category < ActiveRecord::Base
   has_many :products
   belongs_to :account
 
-  maps_to_insales
-  map_insales_fields parent_id: :insales_parent_id
-
+  maps_to_insales parent_id: :insales_parent_id
 end

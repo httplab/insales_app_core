@@ -22,9 +22,10 @@ module InsalesAppCore
 
       module ClassMethods
 
-        def maps_to_insales
+        def maps_to_insales(fields = {})
           @maps_to_insales = true
-          map_insales_fields(id: :insales_id)
+          field_mapping[:id] = :insales_id
+          field_mapping.merge!(fields)
         end
 
         def ids_map
@@ -48,10 +49,6 @@ module InsalesAppCore
 
         def get_local_field(insales_field)
           field_mapping.fetch(insales_field, insales_field)
-        end
-
-        def map_insales_fields(fields = {})
-          field_mapping.merge!(fields)
         end
 
         def field_mapping

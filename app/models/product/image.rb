@@ -3,6 +3,5 @@ class Product::Image < ActiveRecord::Base
   belongs_to :account
   belongs_to :product
 
-  maps_to_insales
-  map_insales_fields product_id: :insales_product_id
+  maps_to_insales product_id: :insales_product_id
 end

@@ -8,6 +8,5 @@ class Product < ActiveRecord::Base
   has_many :variants
   has_many :images, class_name: 'Product::Image'
 
-  maps_to_insales
-  map_insales_fields category_id: :insales_category_id
+  maps_to_insales category_id: :insales_category_id
 end
