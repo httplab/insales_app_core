@@ -5,11 +5,11 @@ module InsalesAppCore
     module Synchronizer
       extend Observable
 
-      ENTITY_CREATED = 0
-      ENTITY_MODIFIED = 1
-      ENTITY_DELETED = 2
-      WILL_WAIT_FOR = 3
-      ENTITY_INTACT = 4
+      ENTITY_INTACT = 0
+      ENTITY_CREATED = 1
+      ENTITY_MODIFIED = 2
+      ENTITY_DELETED = 3
+      WILL_WAIT_FOR = 4
 
       def self.safe_api_call(cooldown = 20, &block)
         begin
@@ -72,15 +72,18 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_products(account_id)
+      def self.sync_products(account_id, updated_since = nil)
         page = 1
         remote_ids = []
         category_map = Category.ids_map
 
         while true do
-
-          page_result = safe_api_call{InsalesApi::Product.find(:all, params: {per_page: 250, page: page})}
-
+          params = {
+            per_page: 250,
+            page: page
+          }
+          params[:updated_since] = updated_since if updated_since.present?
+          page_result = safe_api_call{InsalesApi::Product.find(:all, params: params)}
           # https://github.com/rails/activeresource/commit/c665bf3c7ccc834017a2168ee3c8a68a622b70e6
           # Пока это не попадет в релиз, придется использовать to_a
           break if page_result.to_a.empty?
@@ -98,7 +101,7 @@ module InsalesAppCore
           end
         end
 
-        unless remote_ids.empty?
+        if remote_ids.any? && updated_since.nil?
           deleted = Product.where('account_id = ? AND insales_id NOT IN (?)', account_id, remote_ids).delete_all
           changed
           notify_observers(ENTITY_DELETED, deleted)
@@ -106,19 +109,18 @@ module InsalesAppCore
       end
 
       def self.sync_variants(account_id, remote_product, local_product)
-
         remote_variants = remote_product.variants
 
         remote_variants.each do |remote_variant|
           begin
-          local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, product_id: local_product.id)
-          local_variant.insales_product_id ||= remote_variant.id
-          update_event(local_variant)
-          local_variant.save!
+            local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, product_id: local_product.id)
+            local_variant.insales_product_id ||= remote_variant.id
+            update_event(local_variant)
+            local_variant.save!
           rescue => ex
             puts ex.message
             puts remote_variant.inspect
-            break
+            next
           end
         end
 
@@ -131,20 +133,19 @@ module InsalesAppCore
         end
       end
 
-
       def self.sync_images(account_id, insales_product, local_product)
         remote_images = insales_product.images
 
         remote_images.each do |remote_image|
           begin
-          local_image = Product::Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, product_id: local_product.id)
-          local_image.insales_product_id ||= insales_product.id
-          update_event(local_image)
-          local_image.save!
+            local_image = Product::Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, product_id: local_product.id)
+            local_image.insales_product_id ||= insales_product.id
+            update_event(local_image)
+            local_image.save!
           rescue => ex
             puts ex.message
             puts remote_image.inspect
-            break
+            next
           end
         end
 

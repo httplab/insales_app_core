@@ -1,8 +1,3 @@
-# desc "Explaining what the task does"
-# task :insales_app_core do
-#   # Task goes here
-# end
-
 require('colorize')
 
 class SyncObserver
@@ -12,7 +7,7 @@ class SyncObserver
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
       print "+".green
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED
-      print ".".yellow
+      print "~".yellow
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_DELETED
       if args[0].kind_of?(Numeric)
         args[0].times do
