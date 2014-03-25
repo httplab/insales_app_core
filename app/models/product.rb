@@ -6,7 +6,7 @@ class Product < ActiveRecord::Base
   belongs_to :category
   belongs_to :account
   has_many :variants
-  has_many :images, class_name: 'Product::Image'
+  has_many :images
 
   maps_to_insales category_id: :insales_category_id
 end

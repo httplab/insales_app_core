@@ -138,7 +138,7 @@ module InsalesAppCore
 
         remote_images.each do |remote_image|
           begin
-            local_image = Product::Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, product_id: local_product.id)
+            local_image = Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, product_id: local_product.id)
             local_image.insales_product_id ||= insales_product.id
             update_event(local_image)
             local_image.save!
@@ -152,7 +152,7 @@ module InsalesAppCore
         remote_ids = remote_images.map(&:id)
 
         if remote_ids.any?
-          deleted = Product::Image.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
+          deleted = Image.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
           changed
           notify_observers(ENTITY_DELETED, deleted)
         end
