@@ -5,4 +5,8 @@ Rails.application.routes.draw do
   resource :session, only: [:new, :create, :destroy] do
     get :autologin
   end
+
+  resources :categories, only: [:index] do
+    get :tree, on: :collection
+  end
 end
