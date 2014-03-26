@@ -23,4 +23,14 @@ class InsalesAppCore::InstallGenerator < Rails::Generators::Base
       EOF
     end
   end
+
+  def add_application_yml_keys
+    app_name = Rails.application.class.parent_name.underscore
+    append_file 'config/application.yml' do
+      "\nINSALES_API_KEY: '#{app_name}'\n" +
+      "INSALES_API_SECRET: 'xa0242zz4e477f4e2f36016e72f0990a'\n" +
+      "INSALES_API_HOST: 'localhost:3000'\n" +
+      "INSALES_API_AUTOLOGIN_PATH: 'session/autologin'"
+    end
+  end
 end

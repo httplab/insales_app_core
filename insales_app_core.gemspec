@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'kaminari'
   s.add_dependency 'colorize'
   s.add_dependency 'bootstrap-sass', '~> 3.1.1'
+  s.add_dependency 'bootstrap_form'
 end
