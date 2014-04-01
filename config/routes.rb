@@ -6,6 +6,8 @@ Rails.application.routes.draw do
     get :autologin
   end
 
+  resource :account_settings, only: [:edit, :update]
+
   resources :categories, only: [:index] do
     get :tree, on: :collection
   end

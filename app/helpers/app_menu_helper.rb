@@ -21,7 +21,7 @@ module AppMenuHelper
     end
 
     # Рендерим подменю, если таковое имеется
-    if active_item.submenu
+    if active_item.try(:submenu)
       markup += content_tag(:ul, class: 'nav nav-pills', id: 'app-submenu') do
         active_item.submenu.items.each do |item|
           concat(render_app_menu_item(item))
