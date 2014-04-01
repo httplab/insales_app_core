@@ -16,3 +16,4 @@ module InsalesAppCoreHelper
     end
   end
 end
+
