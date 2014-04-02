@@ -6,7 +6,6 @@ describe InsalesAppCore::AppMenu do
       m.add_item 'title'
       m.add_item 'title1'
     end
-
     expect(menu.items.count).to eq 2
   end
 
@@ -21,5 +20,9 @@ describe InsalesAppCore::AppMenu do
 
     expect(menu.items[1]).to be_has_submenu
     expect(menu.items[1].submenu.items.count).to eq 1
+  end
+
+  context 'submenu' do
+    it 'have parent item'
   end
 end
