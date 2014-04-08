@@ -42,6 +42,7 @@ module InsalesAppCore
       end
 
       def self.sync_all(account_id)
+        sync_fields(account_id)
         sync_orders(account_id)
         # sync_categories(account_id)
         # sync_products(account_id)
@@ -157,6 +158,22 @@ module InsalesAppCore
         end
       end
 
+      def self.sync_fields(account_id)
+        remote_fields = safe_api_call{InsalesApi::Field.all}
+        remote_ids = remote_fields.map(&:id)
+        remote_fields.each do |remote_field|
+          local_field = Field.update_or_create_by_insales_entity(remote_field, account_id: account_id)
+          update_event(local_field)
+          local_field.save!
+        end
+
+        if remote_ids.any?
+          deleted = Field.where('account_id = ? AND insales_id NOT IN (?)', account_id, remote_ids).delete_all
+          changed
+          notify_observers(ENTITY_DELETED, deleted)
+        end
+      end
+
       def self.sync_orders(account_id)
         remote_ids = []
         get_paged(InsalesApi::Order, 250) do |page_result|
@@ -166,6 +183,8 @@ module InsalesAppCore
             local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
             update_event(local_order)
             local_order.save!
+
+            sync_fields_values(remote_order.fields_values, account_id, local_order.id)
           end
         end
 
@@ -174,6 +193,29 @@ module InsalesAppCore
           changed
           notify_observers(ENTITY_DELETED, deleted)
         end
+      end
+
+      def self.sync_fields_values(remote_fields_values, account_id, owner_id)
+        remote_ids = remote_fields_values.map(&:id)
+
+        fields_map = Hash[Field.pluck(:insales_id, :id)]
+
+        remote_fields_values.each do |remote_fields_value|
+
+          local_field_id = fields_map[remote_fields_value.field_id.to_i]
+          next if local_field_id.nil?
+          local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
+            account_id: account_id, owner_id: owner_id, field_id: local_field_id)
+          update_event(local_fields_value)
+          local_fields_value.save!
+        end
+
+        if remote_ids.any?
+          deleted = FieldsValue.where('account_id = ? AND owner_id = ? AND insales_id NOT IN (?)',
+           account_id, owner_id, remote_ids).delete_all
+          notify_observers(ENTITY_DELETED, deleted)
+        end
+
       end
 
       def self.get_paged(type, page_size = nil, addl_params = {})

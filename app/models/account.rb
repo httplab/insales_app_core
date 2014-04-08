@@ -7,6 +7,8 @@ class Account < ActiveRecord::Base
   has_many :variants
   has_many :images
   has_many :orders
+  has_many :fields
+  has_many :fields_values
 
   def self.create_by_insales_request!(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
