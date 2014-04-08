@@ -42,8 +42,9 @@ module InsalesAppCore
       end
 
       def self.sync_all(account_id)
-        sync_categories(account_id)
-        sync_products(account_id)
+        sync_orders(account_id)
+        # sync_categories(account_id)
+        # sync_products(account_id)
       end
 
       def self.sync_categories(account_id)
@@ -73,21 +74,10 @@ module InsalesAppCore
       end
 
       def self.sync_products(account_id, updated_since = nil)
-        page = 1
         remote_ids = []
         category_map = Category.ids_map
 
-        while true do
-          params = {
-            per_page: 250,
-            page: page
-          }
-          params[:updated_since] = updated_since if updated_since.present?
-          page_result = safe_api_call{InsalesApi::Product.find(:all, params: params)}
-          # https://github.com/rails/activeresource/commit/c665bf3c7ccc834017a2168ee3c8a68a622b70e6
-          # Пока это не попадет в релиз, придется использовать to_a
-          break if page_result.to_a.empty?
-          page += 1
+        get_paged(InsalesApi::Product, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
 
           page_result.each do |remote_product|
@@ -164,6 +154,48 @@ module InsalesAppCore
           notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity)
         else
           notify_observers(ENTITY_INTACT, entity)
+        end
+      end
+
+      def self.sync_orders(account_id)
+        remote_ids = []
+        get_paged(InsalesApi::Order, 250) do |page_result|
+          remote_ids += page_result.map(&:id)
+
+          page_result.each do |remote_order|
+            local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
+            update_event(local_order)
+            local_order.save!
+          end
+        end
+
+        if remote_ids.any?
+          deleted = Order.where('account_id = ? AND insales_id NOT IN (?)', account_id, remote_ids).delete_all
+          changed
+          notify_observers(ENTITY_DELETED, deleted)
+        end
+      end
+
+      def self.get_paged(type, page_size = nil, addl_params = {})
+        page = 1
+        while true do
+          params = {
+            page: page
+          }
+          params[:page_size] = page_size if !page_size.nil?
+          addl_params.delete_if{|k,v| v.nil?}
+          params.merge!(addl_params)
+          page_result = safe_api_call{type.find(:all, params: params)}
+
+          # https://github.com/rails/activeresource/commit/c665bf3c7ccc834017a2168ee3c8a68a622b70e6
+          # Пока это не попадет в релиз, придется использовать to_a
+          return if page_result.to_a.empty?
+
+          if(block_given?)
+            yield page_result
+          end
+
+          page+=1
         end
       end
 
