@@ -16,6 +16,7 @@ PATH
       has_scope
       insales_api
       kaminari
+      kaminari-bootstrap (~> 3.0.1)
       nokogiri
       rails (~> 4.0.4)
       responders
@@ -69,7 +70,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.7.0)
-    colorize (0.7.0)
+    colorize (0.7.2)
     diff-lcs (1.2.5)
     erubis (2.7.0)
     execjs (2.0.2)
@@ -90,6 +91,9 @@ GEM
     kaminari (0.15.1)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
+    kaminari-bootstrap (3.0.1)
+      kaminari (>= 0.13.0)
+      rails
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
