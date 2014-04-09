@@ -25,7 +25,7 @@ class InsalesAppCore::AppMenu
     items.each do |item|
       # Пункт считаем активным, если его path, или path кого-либо из подменю совпадает
       # с request.path
-      active_current = (path == item.clean_path)
+      active_current = (path.index(item.clean_path) == 0)
       active_somebody_in_submenu = item.submenu && item.submenu.set_active_flags(path)
 
       if item.active = active_current || active_somebody_in_submenu

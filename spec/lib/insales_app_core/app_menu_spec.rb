@@ -22,7 +22,14 @@ describe InsalesAppCore::AppMenu do
     expect(menu.items[1].submenu.items.count).to eq 1
   end
 
-  context 'submenu' do
-    it 'have parent item'
+  it 'set active item for REST sections in path' do
+    menu = InsalesAppCore::AppMenu.new do |m|
+      m.add_item 'title', '/resources'
+    end
+
+    menu_item = menu.items.first
+    menu.set_active_flags('/resources/new')
+
+    expect(menu_item).to be_active
   end
 end
