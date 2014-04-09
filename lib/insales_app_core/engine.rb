@@ -7,6 +7,7 @@ require 'responders'
 require 'unicode'
 require 'nokogiri'
 require 'kaminari'
+require 'bootstrap-kaminari-views'
 require 'bootstrap-sass'
 
 module InsalesAppCore

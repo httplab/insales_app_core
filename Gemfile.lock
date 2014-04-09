@@ -10,13 +10,13 @@ PATH
   specs:
     insales_app_core (0.0.1)
       active_link_to
+      bootstrap-kaminari-views
       bootstrap-sass (~> 3.1.1)
       bootstrap_form
       colorize
       has_scope
       insales_api
       kaminari
-      kaminari-bootstrap (~> 3.0.1)
       nokogiri
       rails (~> 4.1.0)
       responders
@@ -61,6 +61,9 @@ GEM
       tzinfo (~> 1.1)
     arel (5.0.0)
     awesome_print (1.2.0)
+    bootstrap-kaminari-views (0.0.3)
+      kaminari (>= 0.13)
+      rails (>= 3.1)
     bootstrap-sass (3.1.1.0)
       sass (~> 3.2)
     builder (3.2.2)
@@ -93,9 +96,6 @@ GEM
     kaminari (0.15.1)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
-    kaminari-bootstrap (3.0.1)
-      kaminari (>= 0.13.0)
-      rails
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
