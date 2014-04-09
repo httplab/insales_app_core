@@ -15,5 +15,21 @@ module InsalesAppCoreHelper
       app_name
     end
   end
+
+  def insales_admin_order_url(order)
+    id = if order.is_a?(Order)
+      order.insales_id
+    elsif order.is_a?(InsalesApi::Order)
+      order.id
+    elsif !(ord = Order.find_by_number(order)).nil?
+      ord.insales_id
+    elsif !(ord = Order.find_by_id(order)).nil?
+      ord.insales_id
+    end
+
+    if !id.nil?
+      "http://#{current_account.insales_subdomain}/admin/orders/#{id}"
+    end
+  end
 end
 
