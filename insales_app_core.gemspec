@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
 
   s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.rdoc']
 
-  s.add_dependency 'rails', '~> 4.0.4'
+  s.add_dependency 'rails', '~> 4.1.0'
   s.add_dependency 'has_scope'
   s.add_dependency 'insales_api'
   s.add_dependency 'active_link_to'
