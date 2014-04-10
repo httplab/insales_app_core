@@ -10,6 +10,8 @@ module InsalesAppCore
       ENTITY_MODIFIED = 2
       ENTITY_DELETED = 3
       WILL_WAIT_FOR = 4
+      STAGE = 5
+      END_SYNC = 6
 
       def self.safe_api_call(cooldown = 20, &block)
         begin
@@ -37,15 +39,52 @@ module InsalesAppCore
 
       def self.sync_all_accounts
         all_accounts do |acc|
-          sync_all(acc.id)
+          sync_all(acc)
         end
       end
 
-      def self.sync_all(account_id)
-        sync_fields(account_id)
-        sync_orders(account_id)
-        # sync_categories(account_id)
-        # sync_products(account_id)
+      def self.sync_all_accounts_recent
+        all_accounts do |acc|
+          sync_all_recent(acc)
+        end
+      end
+
+      def self.sync_all(acc)
+        stage('Synchroniznig categories')
+        sync_categories(acc.id)
+        stage('Synchroniznig products')
+        sync_products(acc.id)
+
+        acc.products_last_sync = DateTime.now
+        acc.save!
+
+        stage('Synchroniznig fields')
+        sync_fields(acc.id)
+        stage('Synchroniznig orders')
+        sync_orders(acc.id)
+
+        acc.orders_last_sync = DateTime.now
+        acc.save!
+
+        end_sync
+      end
+
+      def self.sync_all_recent(acc)
+        stage('Synchroniznig categories')
+        sync_categories(acc.id)
+        stage('Synchroniznig recent products')
+        sync_products(acc.id, acc.products_last_sync)
+        acc.products_last_sync = DateTime.now
+        acc.save!
+
+        stage('Synchroniznig fields')
+        sync_fields(acc.id)
+        stage('Synchroniznig recent orders')
+        sync_orders(acc.id, acc.orders_last_sync)
+        acc.orders_last_sync = DateTime.now
+        acc.save!
+
+        end_sync
       end
 
       def self.sync_categories(account_id)
@@ -158,6 +197,16 @@ module InsalesAppCore
         end
       end
 
+      def self.stage(stage)
+        changed
+        notify_observers(STAGE, stage)
+      end
+
+      def self.end_sync
+        changed
+        notify_observers(END_SYNC)
+      end
+
       def self.sync_fields(account_id)
         remote_fields = safe_api_call{InsalesApi::Field.all}
         remote_ids = remote_fields.map(&:id)
@@ -174,9 +223,9 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_orders(account_id)
+      def self.sync_orders(account_id, updated_since = nil)
         remote_ids = []
-        get_paged(InsalesApi::Order, 250) do |page_result|
+        get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
 
           page_result.each do |remote_order|

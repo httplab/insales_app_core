@@ -20,6 +20,11 @@ class SyncObserver
       print "."
     when ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR
       print "*#{args[0]}*".red
+    when ::InsalesAppCore::Synchronization::Synchronizer::STAGE
+      puts
+      puts args[0]
+    when ::InsalesAppCore::Synchronization::Synchronizer::END_SYNC
+      puts 'Synchronization completed'
     end
 
     # case type
@@ -43,5 +48,10 @@ namespace :insales_sync do
   desc 'Synchronize all Insales entities for all accounts'
   task all: :environment do
     ::InsalesAppCore::Synchronization::Synchronizer.sync_all_accounts
+  end
+
+  desc 'Synchronize all recently modified Insales entities for all accounts'
+  task all_recent: :environment do
+    ::InsalesAppCore::Synchronization::Synchronizer.sync_all_accounts_recent
   end
 end

@@ -37,5 +37,16 @@ class Account < ActiveRecord::Base
     app = create_app
     app.configure_api
   end
+
+  [:orders, :products].each do |ent|
+    define_method ("#{ent}_last_sync") do
+      (sync_settings || {})[ent.to_s]
+    end
+
+    define_method ("#{ent}_last_sync=") do |val|
+      self.sync_settings = (self.sync_settings || {}).merge({ent.to_s => val})
+      val
+    end
+  end
 end
 
