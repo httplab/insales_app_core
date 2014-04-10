@@ -8,7 +8,7 @@ class CreateProducts < ActiveRecord::Migration
       t.integer :category_id
       t.integer :insales_category_id
       t.text :description
-      t.string :html_title
+      t.text :html_title
       t.boolean :is_hidden, null: false
       t.string :meta_description
       t.string :meta_keywords

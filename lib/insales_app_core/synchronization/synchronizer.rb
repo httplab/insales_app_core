@@ -53,17 +53,18 @@ module InsalesAppCore
         stage('Synchroniznig categories')
         sync_categories(acc.id)
         stage('Synchroniznig products')
-        sync_products(acc.id)
 
         acc.products_last_sync = DateTime.now
+        sync_products(acc.id)
         acc.save!
 
         stage('Synchroniznig fields')
         sync_fields(acc.id)
         stage('Synchroniznig orders')
-        sync_orders(acc.id)
+
 
         acc.orders_last_sync = DateTime.now
+        sync_orders(acc.id)
         acc.save!
 
         end_sync
@@ -73,18 +74,29 @@ module InsalesAppCore
         stage('Synchroniznig categories')
         sync_categories(acc.id)
         stage('Synchroniznig recent products')
-        sync_products(acc.id, acc.products_last_sync)
         acc.products_last_sync = DateTime.now
+        sync_products(acc.id, acc.products_last_sync)
         acc.save!
 
         stage('Synchroniznig fields')
         sync_fields(acc.id)
         stage('Synchroniznig recent orders')
-        sync_orders(acc.id, acc.orders_last_sync)
         acc.orders_last_sync = DateTime.now
+        sync_orders(acc.id, acc.orders_last_sync)
         acc.save!
-
         end_sync
+      end
+
+      def self.sync_recent_orders
+        all_accounts do |acc|
+           stage('Synchroniznig fields')
+          sync_fields(acc.id)
+          stage('Synchroniznig orders')
+          acc.orders_last_sync = DateTime.now
+          sync_orders(acc.id)
+          acc.save!
+          end_sync
+        end
       end
 
       def self.sync_categories(account_id)
@@ -123,11 +135,18 @@ module InsalesAppCore
           page_result.each do |remote_product|
             category_id = category_map[remote_product.category_id]
             next if category_id.nil?
+            begin
             local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
             update_event(local_product)
             local_product.save!
             sync_variants(account_id, remote_product, local_product)
             sync_images(account_id, remote_product, local_product)
+            rescue => ex
+              puts ex.message
+              p local_product
+              p local_product.attributes
+              return
+            end
           end
         end
 
@@ -229,9 +248,16 @@ module InsalesAppCore
           remote_ids += page_result.map(&:id)
 
           page_result.each do |remote_order|
-            local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
-            update_event(local_order)
-            local_order.save!
+            begin
+              local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
+              update_event(local_order)
+              local_order.save!
+            rescue => ex
+              puts ex.message
+              p local_order
+              p local_order.attributes
+              return
+            end
 
             sync_fields_values(remote_order.fields_values, account_id, local_order.id)
           end

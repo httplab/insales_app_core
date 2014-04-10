@@ -54,4 +54,9 @@ namespace :insales_sync do
   task all_recent: :environment do
     ::InsalesAppCore::Synchronization::Synchronizer.sync_all_accounts_recent
   end
+
+  desc 'Synchronize all recently modified Insales orders for all accounts'
+  task orders_recent: :environment do
+    ::InsalesAppCore::Synchronization::Synchronizer.sync_recent_orders
+  end
 end
