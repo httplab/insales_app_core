@@ -12,9 +12,12 @@ module InsalesAppCore
       WILL_WAIT_FOR = 4
       STAGE = 5
       END_SYNC = 6
+      REQUEST = 7
+      BEGIN_SYNC = 8
 
       def self.safe_api_call(cooldown = 20, &block)
         begin
+          request(nil)
           yield
         rescue ActiveResource::ServerError => ex
           if ex.response.code == 503
@@ -50,6 +53,7 @@ module InsalesAppCore
       end
 
       def self.sync_all(acc)
+        begin_sync
         stage('Synchroniznig categories')
         sync_categories(acc.id)
         stage('Synchroniznig products')
@@ -71,6 +75,7 @@ module InsalesAppCore
       end
 
       def self.sync_all_recent(acc)
+        begin_sync
         stage('Synchroniznig categories')
         sync_categories(acc.id)
         stage('Synchroniznig recent products')
@@ -88,6 +93,7 @@ module InsalesAppCore
       end
 
       def self.sync_recent_orders
+        begin_sync
         all_accounts do |acc|
            stage('Synchroniznig fields')
           sync_fields(acc.id)
@@ -221,9 +227,19 @@ module InsalesAppCore
         notify_observers(STAGE, stage)
       end
 
+      def self.request(request)
+        changed
+        notify_observers(REQUEST, request)
+      end
+
       def self.end_sync
         changed
         notify_observers(END_SYNC)
+      end
+
+      def self.begin_sync
+        changed
+        notify_observers(BEGIN_SYNC)
       end
 
       def self.sync_fields(account_id)
@@ -251,7 +267,7 @@ module InsalesAppCore
             begin
               local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
               update_event(local_order)
-              local_order.save!
+              local_order.save!(:validate => false)
             rescue => ex
               puts ex.message
               p local_order
@@ -282,7 +298,7 @@ module InsalesAppCore
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
             account_id: account_id, owner_id: owner_id, field_id: local_field_id)
           update_event(local_fields_value)
-          local_fields_value.save!
+          local_fields_value.save!(:validate => false)
         end
 
         if remote_ids.any?
@@ -299,7 +315,7 @@ module InsalesAppCore
           params = {
             page: page
           }
-          params[:page_size] = page_size if !page_size.nil?
+          params[:per_page] = page_size if !page_size.nil?
           addl_params.delete_if{|k,v| v.nil?}
           params.merge!(addl_params)
           page_result = safe_api_call{type.find(:all, params: params)}

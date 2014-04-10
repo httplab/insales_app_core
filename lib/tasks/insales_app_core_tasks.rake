@@ -5,19 +5,19 @@ class SyncObserver
   def self.update(type, *args)
     case type
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
-      print "+".green
+      print '+'.green
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED
-      print "~".yellow
+      print '~'.yellow
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_DELETED
       if args[0].kind_of?(Numeric)
         args[0].times do
-          print "-".red
+          print '-'.red
         end
       else
-        print "-".red
+        print '-'.red
       end
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_INTACT
-      print "."
+      print '.'
     when ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR
       print "*#{args[0]}*".red
     when ::InsalesAppCore::Synchronization::Synchronizer::STAGE
@@ -25,6 +25,10 @@ class SyncObserver
       puts args[0]
     when ::InsalesAppCore::Synchronization::Synchronizer::END_SYNC
       puts 'Synchronization completed'
+    when ::InsalesAppCore::Synchronization::Synchronizer::REQUEST
+      print 'R'.blue
+    when ::InsalesAppCore::Synchronization::Synchronizer::BEGIN_SYNC
+      system('clear')
     end
 
     # case type
