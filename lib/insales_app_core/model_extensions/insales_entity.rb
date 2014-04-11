@@ -47,7 +47,7 @@ module InsalesAppCore
           update_by_insales_entity(insales_entity, attributes) || create_by_insales_entity(insales_entity, attributes)
         end
 
-        def get_local_field(insales_field)
+        def get_local_field(insales_field, default = nil)
           field_mapping.fetch(insales_field, insales_field)
         end
 

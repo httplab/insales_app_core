@@ -266,6 +266,11 @@ module InsalesAppCore
           page_result.each do |remote_order|
             begin
               local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
+
+              if remote_order.cookies.present?
+                local_order.cookies = remote_order.cookies.attributes
+              end
+
               update_event(local_order)
               local_order.save!(:validate => false)
             rescue => ex
@@ -288,8 +293,7 @@ module InsalesAppCore
 
       def self.sync_fields_values(remote_fields_values, account_id, owner_id)
         remote_ids = remote_fields_values.map(&:id)
-
-        fields_map = Hash[Field.pluck(:insales_id, :id)]
+        fields_map = Field.ids_map
 
         remote_fields_values.each do |remote_fields_value|
 
