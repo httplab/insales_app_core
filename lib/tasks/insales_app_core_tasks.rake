@@ -30,17 +30,6 @@ class SyncObserver
     when ::InsalesAppCore::Synchronization::Synchronizer::BEGIN_SYNC
       system('clear')
     end
-
-    # case type
-    # when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
-    #   puts "#{args[0].class.name} created, insales_id: #{args[0].insales_id}".green
-    # when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED
-    #   puts "#{args[0].class.name} updated, id: #{args[0].id}, insales_id: #{args[0].insales_id}".yellow
-    # when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_INTACT
-    #   puts "#{args[0].class.name} intact, id: #{args[0].id}"
-    # when ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR
-    #   puts "API limit reached. Will wait for #{args[0]} seconds"
-    # end
   end
 
   ::InsalesAppCore::Synchronization::Synchronizer.add_observer(self)
