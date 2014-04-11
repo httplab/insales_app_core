@@ -1,6 +1,6 @@
 require('colorize')
 
-class SyncObserver
+class CoreSyncObserver
 
   def self.update(type, *args)
     case type

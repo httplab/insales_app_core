@@ -275,6 +275,7 @@ module InsalesAppCore
               local_order.save!(:validate => false)
             rescue => ex
               puts ex.message
+              puts ex.backtrace
               p local_order
               p local_order.attributes
               return
