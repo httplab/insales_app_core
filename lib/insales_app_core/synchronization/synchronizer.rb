@@ -166,6 +166,11 @@ module InsalesAppCore
       def self.sync_variants(account_id, remote_product, local_product)
         remote_variants = remote_product.variants
 
+        remote_variants_ids = remote_variants.map(&:id)
+        variants.each do |variant|
+          variant.destroy unless remote_variants_ids.include?(variant.insales_id)
+        end
+
         remote_variants.each do |remote_variant|
           begin
             local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, product_id: local_product.id)

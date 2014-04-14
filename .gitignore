@@ -14,10 +14,12 @@ pkg/
 .irb-history
 nginx_rewrite.txt
 .powenv
+tags
 
 *.sublime-project
 *.sublime-workspace
 .idea
+*.swp
 
 /config/database.yml
 /config/application.yml
