@@ -66,7 +66,6 @@ module InsalesAppCore
         sync_fields(acc.id)
         stage('Synchroniznig orders')
 
-
         acc.orders_last_sync = DateTime.now
         sync_orders(acc.id)
         acc.save!
@@ -79,15 +78,17 @@ module InsalesAppCore
         stage('Synchroniznig categories')
         sync_categories(acc.id)
         stage('Synchroniznig recent products')
+        ls = acc.products_last_sync
         acc.products_last_sync = DateTime.now
-        sync_products(acc.id, acc.products_last_sync)
+        sync_products(acc.id, ls)
         acc.save!
 
         stage('Synchroniznig fields')
         sync_fields(acc.id)
         stage('Synchroniznig recent orders')
+        ls = acc.orders_last_sync
         acc.orders_last_sync = DateTime.now
-        sync_orders(acc.id, acc.orders_last_sync)
+        sync_orders(acc.id, ls)
         acc.save!
         end_sync
       end
@@ -95,11 +96,12 @@ module InsalesAppCore
       def self.sync_recent_orders
         begin_sync
         all_accounts do |acc|
-           stage('Synchroniznig fields')
+          stage('Synchroniznig fields')
           sync_fields(acc.id)
           stage('Synchroniznig orders')
+          ls = acc.orders_last_sync
           acc.orders_last_sync = DateTime.now
-          sync_orders(acc.id)
+          sync_orders(acc.id, ls)
           acc.save!
           end_sync
         end
@@ -265,6 +267,7 @@ module InsalesAppCore
 
       def self.sync_orders(account_id, updated_since = nil)
         remote_ids = []
+        puts updated_since
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
 
@@ -290,7 +293,7 @@ module InsalesAppCore
           end
         end
 
-        if remote_ids.any?
+        if remote_ids.any? && updated_since.nil?
           deleted = Order.where('account_id = ? AND insales_id NOT IN (?)', account_id, remote_ids).delete_all
           changed
           notify_observers(ENTITY_DELETED, deleted)

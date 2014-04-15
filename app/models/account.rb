@@ -44,6 +44,7 @@ class Account < ActiveRecord::Base
     end
 
     define_method ("#{ent}_last_sync=") do |val|
+      z = val.respond_to?(:strftime) ? val.strftime("%Y-%m-%d %H:%M:%S %z") : val
       self.sync_settings = (self.sync_settings || {}).merge({ent.to_s => val})
       val
     end
