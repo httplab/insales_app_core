@@ -166,11 +166,13 @@ module InsalesAppCore
       end
 
       def self.sync_variants(account_id, remote_product, local_product)
-        remote_variants = remote_product.variants
 
-        remote_variants_ids = remote_variants.map(&:id)
-        variants.each do |variant|
-          variant.destroy unless remote_variants_ids.include?(variant.insales_id)
+        remote_ids = remote_variants.map(&:id)
+
+        if remote_ids.any?
+          deleted = Variant.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
+          changed
+          notify_observers(ENTITY_DELETED, deleted)
         end
 
         remote_variants.each do |remote_variant|
@@ -184,14 +186,6 @@ module InsalesAppCore
             puts remote_variant.inspect
             next
           end
-        end
-
-        remote_ids = remote_variants.map(&:id)
-
-        if remote_ids.any?
-          deleted = Variant.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
-          changed
-          notify_observers(ENTITY_DELETED, deleted)
         end
       end
 
