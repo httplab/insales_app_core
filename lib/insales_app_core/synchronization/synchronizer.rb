@@ -166,7 +166,7 @@ module InsalesAppCore
       end
 
       def self.sync_variants(account_id, remote_product, local_product)
-
+        remote_variants = remote_product.variants
         remote_ids = remote_variants.map(&:id)
 
         if remote_ids.any?
