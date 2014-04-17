@@ -1,5 +1,7 @@
 class AccountSettingsController < ApplicationController
-  def show
-    redirect_to account_settings_path
-  end
+  include AccountSettingsControllerBase
+
+  respond_to :html
+  responders :flash
+  before_filter :fetch_account_settings
 end

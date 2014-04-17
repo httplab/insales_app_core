@@ -1,6 +1,21 @@
 ru:
   default_app_name: Приложение для InSales
 
+  account_settings:
+    form:
+      hints:
+        from_address: Отображается в качестве e-mail отправителя в письмах
+
+  flash:
+    account_settings:
+      update:
+        notice: Настройки изменены
+        alert: Настройки не были изменены
+
   activerecord:
     models:
-      account_settings: Настройки аккаунта
+      account_settings: настройки аккаунта
+    attributes:
+      account_settings:
+        admin_email: E-mail администратора
+        from_address: Адрес отправителя

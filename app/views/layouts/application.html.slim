@@ -23,6 +23,7 @@ html
       .container-fluid
         = render_app_menu
 
-    #page-content
+    #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
+      = render 'layouts/flash_messages'
       .container-fluid
         = yield

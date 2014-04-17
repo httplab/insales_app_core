@@ -9,6 +9,7 @@ class Account < ActiveRecord::Base
   has_many :orders
   has_many :fields
   has_many :fields_values
+  has_one :settings, class_name: 'AccountSettings', dependent: :destroy
 
   def self.create_by_insales_request!(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
@@ -48,6 +49,13 @@ class Account < ActiveRecord::Base
       self.sync_settings = (self.sync_settings || {}).merge({ent.to_s => val})
       val
     end
+  end
+
+  alias_method :original_settings, :settings
+
+  def settings
+    self.settings = AccountSettings.create unless original_settings
+    original_settings
   end
 end
 
