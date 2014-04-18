@@ -32,4 +32,15 @@ describe InsalesAppCore::AppMenu do
 
     expect(menu_item).to be_active
   end
+
+  it 'highlight home item only if home item selected' do
+    menu = InsalesAppCore::AppMenu.new do |m|
+      m.add_home
+      m.add_item 'title', '/resources'
+    end
+
+    home_item = menu.items.first
+    menu.set_active_flags('/resources/new')
+    expect(home_item).to_not be_active
+  end
 end
