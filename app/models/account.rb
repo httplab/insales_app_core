@@ -50,12 +50,5 @@ class Account < ActiveRecord::Base
       val
     end
   end
-
-  alias_method :original_settings, :settings
-
-  def settings
-    self.settings = AccountSettings.create unless original_settings
-    original_settings
-  end
 end
 

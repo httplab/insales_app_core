@@ -1,11 +1,4 @@
 = form_for @account_settings, url: account_settings_path, method: :put do |f|
   fieldset
-    .form-group
-      = label_tag :admin_email, AccountSettings.human_attribute_name(:admin_email)
-      = f.text_field :admin_email, class: 'form-control'
-
-    .form-group
-      = label_tag :from_address, AccountSettings.human_attribute_name(:from_address)
-      = f.text_field :from_address, class: 'form-control'
 
   = f.submit class: 'btn btn-default'

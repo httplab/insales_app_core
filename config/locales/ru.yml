@@ -17,5 +17,3 @@ ru:
       account_settings: настройки аккаунта
     attributes:
       account_settings:
-        admin_email: E-mail администратора
-        from_address: Адрес отправителя
