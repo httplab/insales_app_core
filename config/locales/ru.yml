@@ -1,6 +1,10 @@
 ru:
   default_app_name: Приложение для InSales
 
+  cancel: Отмена
+  'true': да
+  'false': нет
+
   account_settings:
     form:
       hints:
