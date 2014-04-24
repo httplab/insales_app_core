@@ -31,5 +31,10 @@ module InsalesAppCoreHelper
       "http://#{current_account.insales_subdomain}/admin/orders/#{id}"
     end
   end
+
+  def shop_product_url(product)
+    account = product.account
+    File.join('http://', account.insales_subdomain, 'product', product.permalink)
+  end
 end
 
