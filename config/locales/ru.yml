@@ -22,3 +22,5 @@ ru:
     attributes:
       account_settings:
         admin_email: e-mail администратора
+        shop_name: Название магазина
+        shop_url: Адрес магазина

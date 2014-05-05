@@ -34,7 +34,7 @@ module InsalesAppCoreHelper
 
   def shop_product_url(product)
     account = product.account
-    File.join('http://', account.insales_subdomain, 'product', product.permalink)
+    File.join(account.settings.shop_url, 'product', product.permalink)
   end
 end
 

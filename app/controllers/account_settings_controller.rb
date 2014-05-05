@@ -21,6 +21,6 @@ class AccountSettingsController < ApplicationController
   end
 
   def permitted_params
-    []
+    ['admin_email', 'shop_name', 'shop_url']
   end
 end
