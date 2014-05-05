@@ -178,7 +178,7 @@ module InsalesAppCore
         remote_variants.each do |remote_variant|
           begin
             local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, product_id: local_product.id)
-            local_variant.insales_product_id ||= remote_variant.id
+            local_variant.insales_product_id ||= remote_product.id
             update_event(local_variant)
             local_variant.save!
           rescue => ex
