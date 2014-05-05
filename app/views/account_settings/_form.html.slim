@@ -1,4 +1,5 @@
-= form_for @account_settings, url: account_settings_path, method: :put do |f|
-  fieldset
-
-  = f.submit class: 'btn btn-default'
+= bootstrap_form_for @account_settings, url: account_settings_path, method: :put do |f|
+  = f.text_field :admin_email
+  = link_to t('cancel'), edit_account_settings_path, class: 'btn btn-default'
+  | &nbsp;
+  = f.submit class: 'btn btn-primary'

@@ -6,7 +6,9 @@ Rails.application.routes.draw do
     get :autologin
   end
 
-  resource :account_settings, only: [:edit, :update]
+  scope '/settings' do
+    resource :account_settings, path: '/account', only: [:edit, :update]
+  end
 
   resources :categories, only: [:index] do
     get :tree, on: :collection

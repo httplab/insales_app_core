@@ -21,3 +21,4 @@ ru:
       account_settings: настройки аккаунта
     attributes:
       account_settings:
+        admin_email: e-mail администратора
