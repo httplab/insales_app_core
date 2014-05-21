@@ -10,10 +10,12 @@ class AccountSettings < ActiveRecord::Base
   end
 
   def fetch_current_title
+    account.configure_api
     InsalesApi::Account.current.title
   end
 
   def fetch_current_subdomain
+    account.configure_api
     InsalesApi::Account.current.subdomain
   end
 end
