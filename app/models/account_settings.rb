@@ -9,6 +9,8 @@ class AccountSettings < ActiveRecord::Base
     save!
   end
 
+  # Т.к. вызовы осуществляются в коллбэках, а API инсейлс не сконфигурировано
+  # сразу после создания аккаунта, конфигурируем по-месту.
   def fetch_current_title
     account.configure_api
     InsalesApi::Account.current.title
