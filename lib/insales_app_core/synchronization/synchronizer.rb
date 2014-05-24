@@ -20,7 +20,7 @@ module InsalesAppCore
           request(nil)
           yield
         rescue ActiveResource::ServerError => ex
-          if ex.response.code == 503
+          if ex.response.code == "503"
             retry_after = ex.response['Retry-After']
             retry_after = retry_after.present? ? retry_after.to_i : cooldown
             changed
