@@ -15,6 +15,8 @@ development:
 test:
   adapter: postgresql
   database: insales_app_core_test
+  user: <%= ENV['CI_USER'] || 'postgres' %>
+  password: <%= ENV['CI_PG_PASSWORD'] || '' %>
   pool: 5
   timeout: 5000
 
