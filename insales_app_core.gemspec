@@ -1,3 +1,5 @@
+# -*- encoding : utf-8 -*-
+
 $:.push File.expand_path('../lib', __FILE__)
 
 # Maintain your gem's version:
@@ -11,6 +13,8 @@ Gem::Specification.new do |s|
   s.email       = ['dev@httplab.ru']
   s.homepage    = 'http://gitlab.httplab.ru/apps/insales_app_core'
   s.summary     = 'Базовая функциональность проектов для магазина приложений InSales.'
+
+  s.required_ruby_version = '>= 2.1'
 
   s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.rdoc']
 
