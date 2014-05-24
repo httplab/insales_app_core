@@ -9,3 +9,8 @@ body {
 #app-submenu {
   margin-top: 10px;
 }
+
+// pagination gap link hack
+.pagination .page.gap a {
+  cursor: default;
+}
