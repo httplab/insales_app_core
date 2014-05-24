@@ -145,7 +145,7 @@ module InsalesAppCore
             next if category_id.nil?
             begin
             local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
-            update_event(local_product)
+            update_event(local_product, remote_product)
             local_product.save!
             sync_variants(account_id, remote_product, local_product)
             sync_images(account_id, remote_product, local_product)
@@ -214,12 +214,12 @@ module InsalesAppCore
         end
       end
 
-      def self.update_event(entity)
+      def self.update_event(entity, remote_entity = nil)
         changed
         if entity.new_record? || entity.changed?
-          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity)
+          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity)
         else
-          notify_observers(ENTITY_INTACT, entity)
+          notify_observers(ENTITY_INTACT, entity, remote_entity)
         end
       end
 
