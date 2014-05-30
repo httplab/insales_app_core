@@ -9,5 +9,6 @@ gem 'coffee-rails', '~> 4.0.0'
 
 gem 'awesome_print'
 gem 'rspec-rails'
-gem 'factory_girl_rails'
+gem 'factory_girl_rails', require: false
+gem 'faker'
 gem 'pg'

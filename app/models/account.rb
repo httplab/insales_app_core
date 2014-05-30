@@ -50,5 +50,10 @@ class Account < ActiveRecord::Base
       val
     end
   end
+
+  def tariff_info
+    tariff_conf = Tariffication.config[tariff_id]
+    tariff_conf.instance(id) if tariff_conf
+  end
 end
 

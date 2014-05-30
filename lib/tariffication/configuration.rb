@@ -13,7 +13,7 @@ module Tariffication
     end
 
     def [](name)
-      @tariffs[name]
+      @tariffs[name.to_sym] if name.present?
     end
   end
 end
