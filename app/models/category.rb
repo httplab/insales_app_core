@@ -8,6 +8,7 @@ class Category < ActiveRecord::Base
   maps_to_insales parent_id: :insales_parent_id
 
   scope :top_level, ->{where('parent_id IS NULL')}
+  scope :order_by_position, -> { order(:position) }
 
   def self.tree_hash
     top_level.map(&:subtree_hash)
