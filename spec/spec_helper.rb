@@ -21,9 +21,9 @@ ActiveRecord::Migrator.migrate File.expand_path("../../db/migrate/", __FILE__)
 Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 
 RSpec.configure do |config|
-  config.mock_with :rspec do |c|
-    c.syntax = :expect
-  end
+  # config.mock_with :rspec do |c|
+  #   c.syntax = :expect
+  # end
 
   # ## Mock Framework
   #

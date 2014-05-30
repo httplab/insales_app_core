@@ -11,13 +11,13 @@ module Tariffication
     def install
       account.configure_api
       InsalesApi::RecurringApplicationCharge.create(monthly: @config.base_price)
-      account.tariff_info = {}
-      installation_date = DateTime.now
+      account.tariff_data = {}
+      set_installation_date(DateTime.now)
       init_period
     end
 
     def init_period
-      period_start = DateTime.now
+      set_period_start(DateTime.now)
 
       @config.limit_actions.each do |k,v|
         set_limit(k, v)
@@ -33,8 +33,16 @@ module Tariffication
     def uninstall
       account.configure_api
       InsalesApi::RecurringApplicationCharge.instance.destroy
-      account.tariff_info = nil
+      account.tariff_data = nil
       account.save!
+    end
+
+    def installation_date
+      get_installation_date
+    end
+
+    def period_start
+      get_period_start
     end
 
     protected
@@ -54,7 +62,7 @@ module Tariffication
         end
 
         define_singleton_method("perform_#{k}") do |*args, &blck|
-          perform(k, *args, blck)
+          perform(k, *args, &blck)
         end
       end
     end
@@ -74,35 +82,50 @@ module Tariffication
     def after(action, *args)
       if @config.limit_actions.has_key?(action) || @config.free_actions.include?(action)
         set_used(action, used(action)+1)
+        account.save
       end
     end
 
     def perform(action, *args, &block)
-      if can_do?(action)
-        before(action)
+      if can_do?(action, *args)
+        before(action, *args)
         block.call if block_given?
-        after(action)
+        after(action, *args)
       end
     end
 
     def limit(action_name)
-      send("#{action_name}_limit")
+      send("get_#{action_name}_limit")
     end
 
     def set_limit(action_name, value)
-      send("#{action_name}_limit=", value)
+      send("set_#{action_name}_limit", value)
     end
 
     def used(action_name)
-      send("#{action_name}_used")
+      send("get_#{action_name}_used")
     end
 
     def set_used(action_name, value)
-      send("#{action_name}_used=", value)
+      send("set_#{action_name}_used", value)
     end
 
     def account
       @account ||= Account.find(@account_id)
+    end
+
+    def method_missing(meth, *args, &block)
+      if matches = meth.to_s.match(/^set_(.*)$/)
+        ti = account.tariff_data.clone() || {}
+        ti[matches[1]] = args[0]
+        account.tariff_data = ti
+        args[0]
+      elsif matches = meth.to_s.match(/^get_(.*)$/)
+        (account.tariff_data || {})[matches[1]]
+      else
+        super
+      end
+
     end
 
   end

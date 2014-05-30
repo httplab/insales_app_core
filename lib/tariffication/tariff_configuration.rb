@@ -36,6 +36,5 @@ module Tariffication
       @free_actions << name
     end
 
-
   end
 end
