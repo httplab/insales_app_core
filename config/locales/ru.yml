@@ -9,9 +9,21 @@ ru:
     form:
       hints:
         from_address: Отображается в качестве e-mail отправителя в письмах
+  dialog_templates:
+    form:
+      standard: Стандартный диалог
+      custom: Пользовательский диалог
+      placeholder:
+        dialog_selector: 'Пример: #notification-dialog'
+      help:
+        dialog_selector: Разметка диалога должна присутствовать на странице товара скрытой
 
   flash:
     account_settings:
+      update:
+        notice: Настройки изменены
+        alert: Настройки не были изменены
+    dialog_template:
       update:
         notice: Настройки изменены
         alert: Настройки не были изменены
@@ -19,8 +31,15 @@ ru:
   activerecord:
     models:
       account_settings: настройки аккаунта
+      dialog_template: опции шаблона диалога
     attributes:
       account_settings:
         admin_email: e-mail администратора
         shop_name: Название магазина
         shop_url: Адрес магазина
+      dialog_template:
+        email_required: Запрашивать e-mail
+        phone_required: Запрашивать номер телефона
+        name_required: Запрашивать имя пользователя
+        dialog_selector: JQuery-селектор диалога
+

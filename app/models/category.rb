@@ -20,4 +20,12 @@ class Category < ActiveRecord::Base
     node
   end
 
+  def nested_products
+    return Product.all if parent.nil?
+    return products if children.empty?
+
+    ids = children.order_by_position.pluck(:id)
+    ids.unshift(id)
+    Product.where(Product.arel_table[:category_id].in ids)
+  end
 end
