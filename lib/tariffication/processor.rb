@@ -32,7 +32,7 @@ module Tariffication
 
     def uninstall
       account.configure_api
-      InsalesApi::RecurringApplicationCharge.instance.destroy
+      InsalesApi::RecurringApplicationCharge.find.destroy
       account.tariff_data = nil
       account.save!
     end
