@@ -8,4 +8,8 @@ module Tariffication
   def self.setup(&blk)
     @@config = Tariffication::Configuration.new(&blk)
   end
+
+  def self.tariffs
+    @@config.tariffs || []
+  end
 end

@@ -16,6 +16,7 @@ module Tariffication
     def initialize(&block)
       @limit_actions = {}
       @free_actions = []
+      self.classname = 'Tariffication::Processor'
       block.call(self) if block_given?
     end
 
