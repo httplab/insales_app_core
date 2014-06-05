@@ -7,6 +7,7 @@ class Account < ActiveRecord::Base
   has_many :variants
   has_many :images
   has_many :orders
+  has_many :order_lines
   has_many :fields
   has_many :fields_values
   has_one :settings, class_name: 'AccountSettings', dependent: :destroy

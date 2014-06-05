@@ -1,9 +1,11 @@
-require('observer')
+require 'observer'
+require_relative 'sync_methods'
 
 module InsalesAppCore
   module Synchronization
     module Synchronizer
       extend Observable
+      extend ::InsalesAppCore::Synchronization::SyncMethods
 
       ENTITY_INTACT = 0
       ENTITY_CREATED = 1
@@ -15,95 +17,18 @@ module InsalesAppCore
       REQUEST = 7
       BEGIN_SYNC = 8
 
-      def self.safe_api_call(cooldown = 20, &block)
+      def self.safe_api_call(&block)
         begin
           request(nil)
           yield
         rescue ActiveResource::ServerError => ex
-          if ex.response.code == "503"
-            retry_after = ex.response['Retry-After']
-            retry_after = retry_after.present? ? retry_after.to_i : cooldown
-            changed
-            notify_observers(WILL_WAIT_FOR, retry_after)
-            sleep(retry_after)
-            retry
-          else
-            raise ex
-          end
-        end
-      end
-
-      def self.all_accounts(&block)
-        Account.all.each do |acc|
-          acc.configure_api
-          yield acc
-        end
-      end
-
-      def self.sync_all_accounts
-        all_accounts do |acc|
-          sync_all(acc)
-        end
-      end
-
-      def self.sync_all_accounts_recent
-        all_accounts do |acc|
-          sync_all_recent(acc)
-        end
-      end
-
-      def self.sync_all(acc)
-        begin_sync
-        stage('Synchroniznig categories')
-        sync_categories(acc.id)
-        stage('Synchroniznig products')
-
-        acc.products_last_sync = DateTime.now
-        sync_products(acc.id)
-        acc.save!
-
-        stage('Synchroniznig fields')
-        sync_fields(acc.id)
-        stage('Synchroniznig orders')
-
-        acc.orders_last_sync = DateTime.now
-        sync_orders(acc.id)
-        acc.save!
-
-        end_sync
-      end
-
-      def self.sync_all_recent(acc)
-        begin_sync
-        stage('Synchroniznig categories')
-        sync_categories(acc.id)
-        stage('Synchroniznig recent products')
-        ls = acc.products_last_sync
-        acc.products_last_sync = DateTime.now
-        sync_products(acc.id, ls)
-        acc.save!
-
-        stage('Synchroniznig fields')
-        sync_fields(acc.id)
-        stage('Synchroniznig recent orders')
-        ls = acc.orders_last_sync
-        acc.orders_last_sync = DateTime.now
-        sync_orders(acc.id, ls)
-        acc.save!
-        end_sync
-      end
-
-      def self.sync_recent_orders
-        begin_sync
-        all_accounts do |acc|
-          stage('Synchroniznig fields')
-          sync_fields(acc.id)
-          stage('Synchroniznig orders')
-          ls = acc.orders_last_sync
-          acc.orders_last_sync = DateTime.now
-          sync_orders(acc.id, ls)
-          acc.save!
-          end_sync
+          raise ex if "503" != ex.response.code.to_s
+          retry_after = ex.response['Retry-After']
+          retry_after = retry_after.present? ? retry_after.to_i : 150
+          changed
+          notify_observers(WILL_WAIT_FOR, retry_after)
+          sleep(retry_after)
+          retry
         end
       end
 
@@ -135,13 +60,13 @@ module InsalesAppCore
 
       def self.sync_products(account_id, updated_since = nil)
         remote_ids = []
-        category_map = Category.ids_map
+        @category_map ||= Category.ids_map
 
         get_paged(InsalesApi::Product, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
 
           page_result.each do |remote_product|
-            category_id = category_map[remote_product.category_id]
+            category_id = @category_map[remote_product.category_id]
             next if category_id.nil?
             begin
             local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
@@ -214,35 +139,6 @@ module InsalesAppCore
         end
       end
 
-      def self.update_event(entity, remote_entity = nil)
-        changed
-        if entity.new_record? || entity.changed?
-          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity)
-        else
-          notify_observers(ENTITY_INTACT, entity, remote_entity)
-        end
-      end
-
-      def self.stage(stage)
-        changed
-        notify_observers(STAGE, stage)
-      end
-
-      def self.request(request)
-        changed
-        notify_observers(REQUEST, request)
-      end
-
-      def self.end_sync
-        changed
-        notify_observers(END_SYNC)
-      end
-
-      def self.begin_sync
-        changed
-        notify_observers(BEGIN_SYNC)
-      end
-
       def self.sync_fields(account_id)
         remote_fields = safe_api_call{InsalesApi::Field.all}
         remote_ids = remote_fields.map(&:id)
@@ -284,6 +180,7 @@ module InsalesAppCore
             end
 
             sync_fields_values(remote_order.fields_values, account_id, local_order.id)
+            sync_order_lines(remote_order.order_lines, account_id, local_order.id, remote_order.id)
           end
         end
 
@@ -296,11 +193,11 @@ module InsalesAppCore
 
       def self.sync_fields_values(remote_fields_values, account_id, owner_id)
         remote_ids = remote_fields_values.map(&:id)
-        fields_map = Field.ids_map
+        @fields_map ||= Field.ids_map
 
         remote_fields_values.each do |remote_fields_value|
 
-          local_field_id = fields_map[remote_fields_value.field_id.to_i]
+          local_field_id = @fields_map[remote_fields_value.field_id.to_i]
           next if local_field_id.nil?
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
             account_id: account_id, owner_id: owner_id, field_id: local_field_id)
@@ -313,9 +210,32 @@ module InsalesAppCore
            account_id, owner_id, remote_ids).delete_all
           notify_observers(ENTITY_DELETED, deleted)
         end
-
       end
 
+      def self.sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
+        remote_ids = remote_order_lines.map(&:id)
+        @products_map ||= Product.ids_map
+        @variants_map ||= Variant.ids_map
+
+        remote_order_lines.each do |remote_order_line|
+          local_product_id = @products_map[remote_order_line.product_id.to_i]
+          local_variant_id = @variants_map[remote_order_line.variant_id.to_i]
+          next if local_product_id.nil? || local_variant_id.nil?
+          local_order_line = OrderLine.update_or_create_by_insales_entity(remote_order_line,
+            account_id: account_id, order_id: order_id, product_id: local_product_id,
+            variant_id: local_variant_id, insales_order_id: insales_order_id)
+          update_event(local_order_line)
+          local_order_line.save!
+        end
+
+        if remote_ids.any?
+          deleted = OrderLine.where('account_id = ? AND order_id =? AND insales_id NOT in (?)',
+            account_id, order_id, remote_ids).delete_all
+          notify_observers(ENTITY_DELETED, deleted)
+        end
+      end
+
+      # Постраничное получение сущностей
       def self.get_paged(type, page_size = nil, addl_params = {})
         page = 1
         while true do
@@ -337,6 +257,36 @@ module InsalesAppCore
 
           page+=1
         end
+      end
+
+      # Методы для оповещения наблюдателей
+      def self.update_event(entity, remote_entity = nil)
+        changed
+        if entity.new_record? || entity.changed?
+          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity)
+        else
+          notify_observers(ENTITY_INTACT, entity, remote_entity)
+        end
+      end
+
+      def self.stage(stage)
+        changed
+        notify_observers(STAGE, stage)
+      end
+
+      def self.request(request)
+        changed
+        notify_observers(REQUEST, request)
+      end
+
+      def self.end_sync
+        changed
+        notify_observers(END_SYNC)
+      end
+
+      def self.begin_sync
+        changed
+        notify_observers(BEGIN_SYNC)
       end
 
     end
