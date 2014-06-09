@@ -32,6 +32,11 @@ module InsalesAppCoreHelper
     end
   end
 
+  def insales_admin_order_link(order, text=nil)
+    text ||= order.number
+    link_to(text, insales_admin_order_url(order))
+  end
+
   def shop_product_url(product)
     account = product.account
     File.join(account.settings.shop_url, 'product', product.permalink)
