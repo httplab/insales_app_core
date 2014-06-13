@@ -5,6 +5,15 @@ ru:
   'true': да
   'false': нет
 
+  order_status:
+    new: 'новый'
+    declined: 'отклонён'
+    delivered: 'доставлен'
+    dispatched: 'отгружен'
+    approved: 'согласован'
+    accepted: 'принят'
+
+
   account_settings:
     form:
       hints:
@@ -49,5 +58,6 @@ ru:
           number: Номер
           created_at: Дата
           total_price: Итог
+          fulfillment_status: Статус исполнения
 
 
