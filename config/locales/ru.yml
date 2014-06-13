@@ -32,6 +32,9 @@ ru:
     models:
       account_settings: настройки аккаунта
       dialog_template: опции шаблона диалога
+      order:
+        one: Заказ
+        many: Заказы
     attributes:
       account_settings:
         admin_email: e-mail администратора
@@ -42,4 +45,9 @@ ru:
         phone_required: Запрашивать номер телефона
         name_required: Запрашивать имя пользователя
         dialog_selector: JQuery-селектор диалога
+      order:
+          number: Номер
+          created_at: Дата
+          total_price: Итог
+
 
