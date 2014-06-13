@@ -1,6 +1,7 @@
 require_relative 'tariffication/configuration'
 require_relative 'tariffication/tariff_configuration'
 require_relative 'tariffication/processor'
+require_relative 'tariffication/insales_dependent_tariff'
 
 module Tariffication
   mattr_reader :config

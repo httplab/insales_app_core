@@ -1,6 +1,6 @@
 require_relative '../../spec_helper.rb'
 
-describe 'Tariffication::Processor' do
+describe Tariffication::Processor do
 
   before :each do
     @account = build(:account)

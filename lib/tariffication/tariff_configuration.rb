@@ -10,7 +10,8 @@ module Tariffication
                   :image_url,
                   :base_price,
                   :name,
-                  :classname
+                  :classname,
+                  :options
 
 
     def initialize(&block)

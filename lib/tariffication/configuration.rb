@@ -15,5 +15,6 @@ module Tariffication
     def [](name)
       @tariffs[name] if name.present?
     end
+
   end
 end
