@@ -44,7 +44,7 @@ module InsalesAppCore
         self.current_account = if params[:insales_id]
           Account.find_by_insales_id(params[:insales_id])
         else
-          shop_wo_http = (params[:shop] || "").gsub('http://', '')
+          shop_wo_http = (params[:shop] || "")[/[\w\d-]+\.myinsales.ru/]
           Account.find_by_insales_subdomain(InsalesApi::App.prepare_shop(shop_wo_http))
         end
 
