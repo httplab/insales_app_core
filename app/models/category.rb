@@ -20,12 +20,28 @@ class Category < ActiveRecord::Base
     node
   end
 
+  def hierarchy
+    hierarchy = [self]
+    category = parent
+
+    while category do
+      hierarchy.unshift category
+      category = category.parent
+    end
+
+    hierarchy
+  end
+
+  def is_child_of?(category)
+    hierarchy.include?(category)
+  end
+
   def nested_products
     return Product.all if parent.nil?
     return products if children.empty?
 
     ids = children.order_by_position.pluck(:id)
     ids.unshift(id)
-    Product.where(Product.arel_table[:category_id].in ids)
+    Product.where(category_id: ids)
   end
 end
