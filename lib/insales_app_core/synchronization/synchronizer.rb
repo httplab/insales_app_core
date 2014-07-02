@@ -69,15 +69,17 @@ module InsalesAppCore
             category_id = @category_map[remote_product.category_id]
             next if category_id.nil?
             begin
-            local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
-            update_event(local_product, remote_product)
-            local_product.save!
-            sync_variants(account_id, remote_product, local_product)
-            sync_images(account_id, remote_product, local_product)
+              local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
+              update_event(local_product, remote_product)
+              local_product.save!
+              sync_variants(account_id, remote_product, local_product)
+              sync_images(account_id, remote_product, local_product)
             rescue => ex
               puts ex.message
-              p local_product
-              p local_product.attributes
+              if local_product
+                p local_product
+                p local_product.attributes
+              end
               return
             end
           end
