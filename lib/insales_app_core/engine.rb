@@ -9,6 +9,7 @@ require 'nokogiri'
 require 'kaminari'
 require 'bootstrap-kaminari-views'
 require 'bootstrap-sass'
+require 'high_voltage'
 
 module InsalesAppCore
   class Engine < ::Rails::Engine
