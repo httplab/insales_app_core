@@ -60,7 +60,7 @@ module InsalesAppCore
 
       def self.sync_products(account_id, updated_since = nil)
         remote_ids = []
-        @category_map ||= Category.ids_map
+        @category_map = Category.ids_map
 
         get_paged(InsalesApi::Product, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
@@ -195,7 +195,7 @@ module InsalesAppCore
 
       def self.sync_fields_values(remote_fields_values, account_id, owner_id)
         remote_ids = remote_fields_values.map(&:id)
-        @fields_map ||= Field.ids_map
+        @fields_map = Field.ids_map
 
         remote_fields_values.each do |remote_fields_value|
 
@@ -216,8 +216,8 @@ module InsalesAppCore
 
       def self.sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
         remote_ids = remote_order_lines.map(&:id)
-        @products_map ||= Product.ids_map
-        @variants_map ||= Variant.ids_map
+        @products_map = Product.ids_map
+        @variants_map = Variant.ids_map
 
         remote_order_lines.each do |remote_order_line|
           local_product_id = @products_map[remote_order_line.product_id.to_i]
