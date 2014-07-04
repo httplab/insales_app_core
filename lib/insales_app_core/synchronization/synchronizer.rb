@@ -80,7 +80,7 @@ module InsalesAppCore
                 p local_product
                 p local_product.attributes
               end
-              return
+              next
             end
           end
         end
