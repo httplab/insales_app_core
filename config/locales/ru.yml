@@ -49,6 +49,7 @@ ru:
         admin_email: e-mail администратора
         shop_name: Название магазина
         shop_url: Адрес магазина
+        insales_id: ID магазина
       dialog_template:
         email_required: Запрашивать e-mail
         phone_required: Запрашивать номер телефона
