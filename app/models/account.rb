@@ -38,6 +38,7 @@ class Account < ActiveRecord::Base
   def configure_api
     app = create_app
     app.configure_api
+    app
   end
 
   [:orders, :products].each do |ent|

@@ -51,4 +51,5 @@ RSpec.configure do |config|
   config.order = "random"
 
   config.include FactoryGirl::Syntax::Methods
+  config.include InsalesAppCore::TestHelpers::Controller
 end
