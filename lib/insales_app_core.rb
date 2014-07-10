@@ -1,4 +1,3 @@
-require 'insales_app_core/test_helpers'
 require 'insales_app_core/controller_extensions/authorization'
 require 'insales_app_core/controller_extensions/styx'
 require 'insales_app_core/model_extensions/insales_entity'

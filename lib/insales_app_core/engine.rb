@@ -12,6 +12,8 @@ require 'bootstrap-sass'
 require 'high_voltage'
 
 module InsalesAppCore
+  autoload :TestHelpers, 'insales_app_core/test_helpers'
+
   class Engine < ::Rails::Engine
     config.generators do |g|
       g.stylesheet_engine = :scss
