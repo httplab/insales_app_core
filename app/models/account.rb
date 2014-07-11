@@ -41,6 +41,14 @@ class Account < ActiveRecord::Base
     app
   end
 
+  def get_setting(name)
+    InsalesAppCore.config.account_settings.get_value(self, name)
+  end
+
+  def set_setting(name, val)
+    InsalesAppCore.config.account_settings.set_value(self, name, val)
+  end
+
   [:orders, :products].each do |ent|
     define_method ("#{ent}_last_sync") do
       (sync_settings || {})[ent.to_s]
