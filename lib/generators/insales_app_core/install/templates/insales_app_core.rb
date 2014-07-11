@@ -28,7 +28,7 @@ InsalesAppCore.setup do |config|
   # Правая часть главного меню. Предполагаем, что в правой части будут различные сервисные
   # ссылки вроде "Помощь", "Настройки".
   config.right_menu do |m|
-    m.add_item 'Настройки', '/account_settings/edit'
+    m.add_item 'Настройки', '/settings/account/edit'
     # m.add_item 'Помощь', '/help'
   end
 end
