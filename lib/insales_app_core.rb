@@ -7,6 +7,8 @@ require 'insales_app_core/configuration'
 require 'insales_app_core/app_menu/app_menu'
 require 'insales_app_core/app_menu/menu_item'
 require_relative 'tariffication'
+require 'insales_app_core/account_setting'
+require 'insales_app_core/account_setting/account_settings_collection'
 
 module InsalesAppCore
   mattr_accessor :config

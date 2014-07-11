@@ -19,12 +19,18 @@ module InsalesAppCore
       @left_menu
     end
 
-
     def right_menu(&block)
       if block_given?
         @right_menu = InsalesAppCore::AppMenu.new(&block)
       end
       @right_menu
+    end
+
+    def account_settings(&block)
+      if block_given?
+        @account_settings = InsalesAppCore::AccountSetting::AccountSettingsCollection.new(&block) 
+      end
+      @account_settings
     end
 
     private
