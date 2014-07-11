@@ -20,9 +20,9 @@ class InsalesAppCore::AccountSetting::AccountSettingsCollection
   end
 
   def get_value(acc, name)
-    setting = acc.account_settings.find_by_name(name)
+    setting = acc.settings.find_by_name(name)
     val = setting.nil? ? nil : setting.value
-    @s_hash[name].get_value(val)
+    @s_hash[name].get_value(val, acc)
   end
 
   def set_value(acc, name, value)
@@ -35,10 +35,10 @@ class InsalesAppCore::AccountSetting::AccountSettingsCollection
       raise "Nil value for required setting '#{name}'"
     end
 
-    db_setting = acc.account_settings.find_by_name(name)
+    db_setting = acc.settings.find_by_name(name)
 
     if !db_setting
-      db_setting = acc.account_settings.create(name: name, account: acc, value: setting.prepare_value(value))
+      db_setting = acc.settings.create(name: name, account: acc, value: setting.prepare_value(value))
     else
       db_setting.value = setting.prepare_value(value)
       db_setting.save!

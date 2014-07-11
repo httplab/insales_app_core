@@ -1,7 +1,6 @@
-= bootstrap_form_for @account_settings, url: account_settings_path, method: :put do |f|
-  = f.text_field :admin_email
-  = f.text_field :shop_name
-  = f.text_field :shop_url
-  = link_to t('cancel'), edit_account_settings_path, class: 'btn btn-default'
-  | &nbsp;
-  = f.submit class: 'btn btn-primary'
+-case setting.type
+-when :integer
+  =text_field_tag setting.name, current_account.get_setting(setting.name)
+-else
+  =text_field_tag setting.name, current_account.get_setting(setting.name)
+

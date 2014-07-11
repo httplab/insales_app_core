@@ -15,9 +15,8 @@ ru:
 
 
   account_settings:
-    form:
-      hints:
-        from_address: Отображается в качестве e-mail отправителя в письмах
+    edit:
+      submit: Сохранить
   dialog_templates:
     form:
       standard: Стандартный диалог

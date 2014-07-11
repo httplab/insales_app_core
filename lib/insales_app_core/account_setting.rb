@@ -8,7 +8,13 @@ class InsalesAppCore::AccountSetting
   def get_value(raw_value, acc)
     if raw_value.nil?
       val = @default_value.respond_to?(:call) ? @default_value.call(acc) : @default_value
-      return val.nil? ? nil : get_value(val, acc)
+      if val.nil?
+        return nil
+      else 
+        val = get_value(val, acc)
+        acc.set_setting(self.name, val)
+        return val
+      end
     end
 
     case @type
