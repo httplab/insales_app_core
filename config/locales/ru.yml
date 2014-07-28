@@ -13,6 +13,9 @@ ru:
     approved: 'согласован'
     accepted: 'принят'
 
+  order_financial_status:
+    pending: не оплачен
+    paid: оплачен
 
   account_settings:
     edit:
@@ -55,9 +58,11 @@ ru:
         name_required: Запрашивать имя пользователя
         dialog_selector: JQuery-селектор диалога
       order:
-          number: Номер
-          created_at: Дата
-          total_price: Итог
-          fulfillment_status: Статус исполнения
-
-
+        number: Номер
+        accepted_at: Дата создания
+        created_at: Дата
+        total_price: Итог
+        fulfillment_status: Статус исполнения
+        delivery_date: Дата доставки
+        financial_status: Статус оплаты
+        delivery_description: Способ доставки
