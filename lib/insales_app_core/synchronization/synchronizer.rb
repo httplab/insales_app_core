@@ -237,6 +237,35 @@ module InsalesAppCore
         end
       end
 
+      def self.sync_clients(account_id, updated_since = nil)
+        remote_ids = []
+        puts updated_since
+        get_paged(InsalesApi::Client, 250, updated_since: updated_since) do |page_result|
+          remote_ids += page_result.map(&:id)
+
+          page_result.each do |remote_client|
+            begin
+              local_client = Client.update_or_create_by_insales_entity(remote_client, account_id: account_id)
+              update_event(local_client)
+              local_client.save!(validate: false)
+            rescue => ex
+              puts ex.message
+              puts ex.backtrace
+              p local_client
+              p local_client.attributes
+              return
+            end
+          end
+        end
+
+        if remote_ids.any? && updated_since.nil?
+          deleted = Client.where('account_id = ? AND insales_id NOT IN (?)', account_id, remote_ids).delete_all
+          changed
+          notify_observers(ENTITY_DELETED, deleted)
+        end
+      end
+
+
       # Постраничное получение сущностей
       def self.get_paged(type, page_size = nil, addl_params = {})
         page = 1

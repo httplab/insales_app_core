@@ -41,8 +41,12 @@ module InsalesAppCore
 
         stage('Synchroniznig fields')
         sync_fields(acc.id)
-        stage('Synchroniznig orders')
 
+        stage('Synchroniznig clients')
+        acc.clients_last_sync = DateTime.now
+        sync_clients(acc.id)
+
+        stage('Synchroniznig orders')
         acc.orders_last_sync = DateTime.now
         sync_orders(acc.id)
         acc.save!
@@ -60,6 +64,12 @@ module InsalesAppCore
 
         stage('Synchroniznig fields')
         sync_fields(acc.id)
+
+        stage('Synchroniznig clients')
+        ls = acc.clients_last_sync
+        acc.clients_last_sync = DateTime.now
+        sync_clients(acc.id)
+
         stage('Synchroniznig recent orders')
         ls = acc.orders_last_sync
         acc.orders_last_sync = DateTime.now
