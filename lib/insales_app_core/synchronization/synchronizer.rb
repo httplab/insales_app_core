@@ -162,10 +162,17 @@ module InsalesAppCore
         puts updated_since
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
-
           page_result.each do |remote_order|
             begin
-              local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id)
+              insales_client_id = remote_order.client.id
+              client_id = Client.find_by!(insales_id: insales_client_id).id
+
+              hsh = {
+                account_id: account_id,
+                client_id: client_id,
+                insales_client_id: insales_client_id
+              }
+              local_order = Order.update_or_create_by_insales_entity(remote_order, hsh)
 
               if remote_order.cookies.present?
                 local_order.cookies = remote_order.cookies.attributes

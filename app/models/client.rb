@@ -1,7 +1,6 @@
 class Client < ActiveRecord::Base
-  validates :account_id, :insales_id, :name, :surname, :email, :phone, presence: true
+  validates :account_id, :insales_id, :name, presence: true
   belongs_to :account
-  has_many :fields_values, -> { joins(:field).where('fields.destiny = 3') }, class_name: FieldsValue, foreign_key: :owner_id
-
+  has_many :orders
   maps_to_insales
 end

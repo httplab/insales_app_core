@@ -40,7 +40,7 @@ module InsalesAppCore
         def update_by_insales_entity(insales_entity, attributes = {})
           existing_record = find_by_insales_id(insales_entity.id)
           return nil if existing_record.nil?
-          existing_record.set_attributes_by_insales_entity(insales_entity)
+          existing_record.set_attributes_by_insales_entity(insales_entity, attributes)
         end
 
         def update_or_create_by_insales_entity(insales_entity, attributes = {})

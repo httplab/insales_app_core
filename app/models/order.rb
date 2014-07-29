@@ -4,6 +4,7 @@ class Order < ActiveRecord::Base
     presence: true
 
   belongs_to :account
+  belongs_to :client
   has_many :fields_values ,-> {joins(:field).where('fields.destiny = 3') }, class_name: FieldsValue, foreign_key: :owner_id
   has_many :order_lines
 
