@@ -66,3 +66,4 @@ ru:
         delivery_date: Дата доставки
         financial_status: Статус оплаты
         delivery_description: Способ доставки
+        client_name: Клиент

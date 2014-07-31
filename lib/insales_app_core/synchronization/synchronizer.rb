@@ -190,6 +190,7 @@ module InsalesAppCore
 
             sync_fields_values(remote_order.fields_values, account_id, local_order.id)
             sync_order_lines(remote_order.order_lines, account_id, local_order.id, remote_order.id)
+            sync_order_shipping_address(remote_order.shipping_address, account_id, local_order.id)
           end
         end
 
@@ -242,6 +243,11 @@ module InsalesAppCore
             account_id, order_id, remote_ids).delete_all
           notify_observers(ENTITY_DELETED, deleted)
         end
+      end
+
+      def self.sync_order_shipping_address(remote_shipping_address, account_id, order_id)
+        sa = ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
+        sa.save!
       end
 
       def self.sync_clients(account_id, updated_since = nil)
