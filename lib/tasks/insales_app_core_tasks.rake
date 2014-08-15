@@ -31,8 +31,6 @@ class CoreSyncObserver
       system('clear')
     end
   end
-
-  ::InsalesAppCore::Synchronization::Synchronizer.add_observer(self)
 end
 
 namespace :insales_sync do
@@ -46,7 +44,9 @@ namespace :insales_sync do
   desc 'Synchronize all recently modified Insales entities for all accounts'
   task all_recent: :environment do
     prevent_multiple_executions do
-      ::InsalesAppCore::Synchronization::Synchronizer.sync_all_accounts_recent
+      syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
+      syncronizer.add_observer(CoreSyncObserver)
+      syncronizer.sync_all_accounts_recent
     end
   end
 

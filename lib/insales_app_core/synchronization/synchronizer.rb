@@ -3,9 +3,9 @@ require_relative 'sync_methods'
 
 module InsalesAppCore
   module Synchronization
-    module Synchronizer
-      extend Observable
-      extend ::InsalesAppCore::Synchronization::SyncMethods
+    class Synchronizer
+      include Observable
+      include ::InsalesAppCore::Synchronization::SyncMethods
 
       ENTITY_INTACT = 0
       ENTITY_CREATED = 1
@@ -17,7 +17,7 @@ module InsalesAppCore
       REQUEST = 7
       BEGIN_SYNC = 8
 
-      def self.safe_api_call(&block)
+      def safe_api_call(&block)
         begin
           request(nil)
           yield
@@ -32,7 +32,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_categories(account_id)
+      def sync_categories(account_id)
         remote_categories = safe_api_call{InsalesApi::Category.all}
 
         remote_categories.each do |remote_category|
@@ -58,7 +58,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_products(account_id, updated_since = nil)
+      def sync_products(account_id, updated_since = nil)
         remote_ids = []
         @category_map = Category.ids_map
 
@@ -92,7 +92,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_variants(account_id, remote_product, local_product)
+      def sync_variants(account_id, remote_product, local_product)
         remote_variants = remote_product.variants
         remote_ids = remote_variants.map(&:id)
 
@@ -116,7 +116,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_images(account_id, insales_product, local_product)
+      def sync_images(account_id, insales_product, local_product)
         remote_images = insales_product.images
 
         remote_images.each do |remote_image|
@@ -141,7 +141,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_fields(account_id)
+      def sync_fields(account_id)
         remote_fields = safe_api_call{InsalesApi::Field.all}
         remote_ids = remote_fields.map(&:id)
         remote_fields.each do |remote_field|
@@ -157,7 +157,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_orders(account_id, updated_since = nil)
+      def sync_orders(account_id, updated_since = nil)
         remote_ids = []
         puts updated_since
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
@@ -201,7 +201,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_fields_values(remote_fields_values, account_id, owner_id)
+      def sync_fields_values(remote_fields_values, account_id, owner_id)
         remote_ids = remote_fields_values.map(&:id)
         @fields_map = Field.ids_map
 
@@ -222,7 +222,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
+      def sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
         remote_ids = remote_order_lines.map(&:id)
         @products_map = Product.ids_map
         @variants_map = Variant.ids_map
@@ -245,12 +245,12 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_order_shipping_address(remote_shipping_address, account_id, order_id)
+      def sync_order_shipping_address(remote_shipping_address, account_id, order_id)
         sa = ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
         sa.save!
       end
 
-      def self.sync_clients(account_id, updated_since = nil)
+      def sync_clients(account_id, updated_since = nil)
         remote_ids = []
         puts updated_since
         get_paged(InsalesApi::Client, 250, updated_since: updated_since) do |page_result|
@@ -280,7 +280,7 @@ module InsalesAppCore
 
 
       # Постраничное получение сущностей
-      def self.get_paged(type, page_size = nil, addl_params = {})
+      def get_paged(type, page_size = nil, addl_params = {})
         page = 1
         while true do
           params = {
@@ -304,7 +304,7 @@ module InsalesAppCore
       end
 
       # Методы для оповещения наблюдателей
-      def self.update_event(entity, remote_entity = nil)
+      def update_event(entity, remote_entity = nil)
         changed
         if entity.new_record? || entity.changed?
           notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity)
@@ -313,22 +313,22 @@ module InsalesAppCore
         end
       end
 
-      def self.stage(stage)
+      def stage(stage)
         changed
         notify_observers(STAGE, stage)
       end
 
-      def self.request(request)
+      def request(request)
         changed
         notify_observers(REQUEST, request)
       end
 
-      def self.end_sync
+      def end_sync
         changed
         notify_observers(END_SYNC)
       end
 
-      def self.begin_sync
+      def begin_sync
         changed
         notify_observers(BEGIN_SYNC)
       end
