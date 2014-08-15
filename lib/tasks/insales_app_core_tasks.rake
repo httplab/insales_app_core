@@ -5,9 +5,18 @@ class CoreSyncObserver
   def self.update(type, *args)
     case type
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
-      print '+'.green
+      str = "+"
+      if args[0].respond_to? :account_id
+        str = args[0].class.name[0] + args[0].account_id.to_s + ' '
+      end
+      print str.green
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED
-      print '~'.yellow
+      str = "~"
+      if args[0].respond_to? :account_id
+        str = args[0].class.name[0] + args[0].account_id.to_s + ' '
+      end
+
+      print str.yellow
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_DELETED
       if args[0].kind_of?(Numeric)
         args[0].times do
@@ -17,7 +26,12 @@ class CoreSyncObserver
         print '-'.red
       end
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_INTACT
-      print '.'
+      str = "."
+      if args[0].respond_to? :account_id
+        str = args[0].class.name[0] + args[0].account_id.to_s + ' '
+      end
+
+      print str
     when ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR
       print "*#{args[0]}*".red
     when ::InsalesAppCore::Synchronization::Synchronizer::STAGE
@@ -44,9 +58,21 @@ namespace :insales_sync do
   desc 'Synchronize all recently modified Insales entities for all accounts'
   task all_recent: :environment do
     prevent_multiple_executions do
-      syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
-      syncronizer.add_observer(CoreSyncObserver)
-      syncronizer.sync_all_accounts_recent
+      threads = []
+      Account.all.each do |a|
+        threads << Thread.new(a) do |a|
+          a.configure_api
+          syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
+          syncronizer.add_observer(CoreSyncObserver)
+          syncronizer.sync_all_recent(a)
+        end
+      end
+
+      threads.each { |t| t.join }
+
+      # syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
+      # syncronizer.add_observer(CoreSyncObserver)
+      # syncronizer.sync_all_accounts_recent
     end
   end
 
