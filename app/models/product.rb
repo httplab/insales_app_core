@@ -7,6 +7,8 @@ class Product < ActiveRecord::Base
   belongs_to :account
   has_many :variants
   has_many :images
+  has_many :collects, dependent: :destroy
+  has_many :collections, through: :collects
 
   maps_to_insales category_id: :insales_category_id
 

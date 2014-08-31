@@ -58,6 +58,63 @@ module InsalesAppCore
         end
       end
 
+      def self.sync_collections(account_id)
+        remote_collections = safe_api_call{InsalesApi::Collection.all}
+
+        remote_collections.each do |remote_collection|
+          local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
+          update_event(local_collection)
+          local_collection.save!
+        end
+
+        local_collections = Collection.where(account_id: account_id)
+        remote_collections_ids = Set.new(remote_collections.map(&:id))
+        tree_map = Collection.ids_map
+
+        local_collections.each do |local_collection|
+          if !remote_collections_ids.include?(local_collection.insales_id)
+            changed
+            notify_observers(ENTITY_DELETED, local_collection)
+            local_collection.delete
+            next
+          end
+
+          local_collection.parent_id = tree_map[local_collection.insales_parent_id]
+          begin
+            local_collection.save!
+          rescue
+            puts local_collection
+            p local_collection
+          end
+        end
+      end
+
+      def self.sync_collects(account_id)
+        remote_pairs = []
+        collection_map = Collection.ids_map
+        product_map = Product.ids_map
+
+        get_paged(InsalesApi::Collect, 1000) do |page_result|
+          page_result.each do |c|
+            c_id = collection_map[c.collection_id]
+            p_id = product_map[c.product_id]
+            remote_pairs << [c_id, p_id] if c_id && p_id
+          end
+        end
+
+        local_pairs = Collect.where('account_id = ?', account_id).pluck(:collection_id, :product_id)
+
+        pairs_to_delete = local_pairs - remote_pairs
+        pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]},#{p[1]})"}.join(',')
+        Collect.where('(collection_id, product_id) IN (?)', pairs_to_delete).delete_all if pairs_to_delete.present?
+
+        pairs_to_create = remote_pairs - local_pairs
+        values_clause = pairs_to_create.map {|v| "(#{v[0]},#{v[1]},#{account_id})"}.join(',')
+        if pairs_to_create.any?
+          Collect.connection.execute("INSERT INTO collects (collection_id, product_id, account_id) VALUES #{values_clause}")
+        end
+      end
+
       def self.sync_products(account_id, updated_since = nil)
         remote_ids = []
         @category_map = Category.ids_map

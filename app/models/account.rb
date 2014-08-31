@@ -3,6 +3,7 @@ class Account < ActiveRecord::Base
   validates :insales_id, :insales_subdomain, uniqueness: true
 
   has_many :categories
+  has_many :collections
   has_many :products
   has_many :variants
   has_many :images
