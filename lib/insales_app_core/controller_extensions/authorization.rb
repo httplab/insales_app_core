@@ -22,7 +22,11 @@ module InsalesAppCore
         if authorize_by_params!
           redirect_to current_insales_app.authorization_url
         else
-          redirect_to new_session_path
+          # Делаем редирект на страницу логина в том случае, если текущая страница не статическая.
+          # TODO: как-то конфигурировать страницы, которые можно показывать на без аутентификации.
+          if controller_name != 'pages'
+            redirect_to new_session_path
+          end
         end
       end
 

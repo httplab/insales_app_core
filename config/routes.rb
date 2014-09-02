@@ -13,4 +13,6 @@ Rails.application.routes.draw do
   resources :categories, only: [:index] do
     get :tree, on: :collection
   end
+
+  get "/pages/*id" => 'pages#show', format: false
 end

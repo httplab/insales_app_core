@@ -1,0 +1,21 @@
+doctype html
+
+html
+  head
+    title = render_title
+    = stylesheet_link_tag 'application'
+    = javascript_include_tag 'application'
+    = csrf_meta_tags
+
+  body
+    #navbar
+      nav.navbar.navbar-inverse.navbar-fixed-top role='navigation'
+        .container-fluid
+          .navbar-header
+            a.navbar-brand = app_name
+          ul.nav.navbar-nav.navbar-right
+            li = link_to 'Войти', new_session_path
+
+    #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
+      .container-fluid
+        = yield
