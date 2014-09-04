@@ -220,34 +220,7 @@ module InsalesAppCore
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
           page_result.each do |remote_order|
-            begin
-              insales_client_id = remote_order.client.id
-              client_id = Client.find_by!(insales_id: insales_client_id).id
-
-              hsh = {
-                account_id: account_id,
-                client_id: client_id,
-                insales_client_id: insales_client_id
-              }
-              local_order = Order.update_or_create_by_insales_entity(remote_order, hsh)
-
-              if remote_order.cookies.present?
-                local_order.cookies = remote_order.cookies.attributes
-              end
-
-              update_event(local_order)
-              local_order.save!(:validate => false)
-            rescue => ex
-              puts ex.message
-              puts ex.backtrace
-              p local_order
-              p local_order.attributes
-              return
-            end
-
-            sync_fields_values(remote_order.fields_values, account_id, local_order.id)
-            sync_order_lines(remote_order.order_lines, account_id, local_order.id, remote_order.id)
-            sync_order_shipping_address(remote_order.shipping_address, account_id, local_order.id)
+            sync_one_order(remote_order, account_id)
           end
         end
 
@@ -256,6 +229,45 @@ module InsalesAppCore
           changed
           notify_observers(ENTITY_DELETED, deleted)
         end
+      end
+
+      def self.sync_one_order(remote_order, account_id)
+        insales_client_id = remote_order.client.id
+        # Если случилось так, что клиента нет в БД (это может произойти если заказ был создан после того,
+        # как мы синхронизировали клиенты, но еще не начали синхронизировать заказы).
+        client = Client.find_by(insales_id: insales_client_id) || sync_one_client(insales_client_id, account_id)
+
+        # Если клиента никак не удалось получить, кидаем исключение.
+        unless client
+          fail "sync_one_order: Client with insales_client_id=#{insales_client_id} not found in database"
+        end
+
+        hsh = {
+          account_id: account_id,
+          client_id: client.id,
+          insales_client_id: insales_client_id
+        }
+        local_order = Order.update_or_create_by_insales_entity(remote_order, hsh)
+
+        if remote_order.cookies.present?
+          local_order.cookies = remote_order.cookies.attributes
+        end
+
+        update_event(local_order)
+        local_order.save!(:validate => false)
+
+        sync_fields_values(remote_order.fields_values, account_id, local_order.id)
+        sync_order_lines(remote_order.order_lines, account_id, local_order.id, remote_order.id)
+        sync_order_shipping_address(remote_order.shipping_address, account_id, local_order.id)
+        true
+      rescue => ex
+        puts ex.message
+        puts ex.backtrace
+        p local_order
+        if local_order
+          p local_order.attributes
+        end
+        false
       end
 
       def self.sync_fields_values(remote_fields_values, account_id, owner_id)
@@ -312,19 +324,8 @@ module InsalesAppCore
         puts updated_since
         get_paged(InsalesApi::Client, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
-
           page_result.each do |remote_client|
-            begin
-              local_client = Client.update_or_create_by_insales_entity(remote_client, account_id: account_id)
-              update_event(local_client)
-              local_client.save!(validate: false)
-            rescue => ex
-              puts ex.message
-              puts ex.backtrace
-              p local_client
-              p local_client.attributes
-              return
-            end
+            sync_one_client(remote_client, account_id)
           end
         end
 
@@ -335,6 +336,21 @@ module InsalesAppCore
         end
       end
 
+      def self.sync_one_client(remote_client, account_id)
+        unless remote_client.is_a? InsalesApi::Client
+          remote_client = InsalesApi::Client.find remote_client
+        end
+
+        local_client = Client.update_or_create_by_insales_entity(remote_client, account_id: account_id)
+        update_event(local_client)
+        local_client.save!(validate: false)
+        local_client
+      rescue => ex
+        puts ex.message
+        puts ex.backtrace
+        p local_client
+        p local_client.attributes
+      end
 
       # Постраничное получение сущностей
       def self.get_paged(type, page_size = nil, addl_params = {})
