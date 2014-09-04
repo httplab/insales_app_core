@@ -19,3 +19,15 @@ html
     #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
       .container-fluid
         = yield
+
+      #unlogged-modal.modal.fade
+        .modal-dialog
+          .modal-content
+            .modal-header
+              button type="button" class="close" data-dismiss="modal" aria-hidden="true" &times;
+              h4.modal-title Установите приложение
+            .modal-body.text-center
+              p
+                ' Эта ссылка доступна только после установки приложения.
+              p
+                = link_to 'Установить приложение', ENV['INSTALL_APP_LINK'], class: 'btn btn-lg btn-success'
