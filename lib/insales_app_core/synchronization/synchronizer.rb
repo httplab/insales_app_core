@@ -64,7 +64,12 @@ module InsalesAppCore
         remote_collections.each do |remote_collection|
           local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
           update_event(local_collection, account_id, remote_collection)
-          local_collection.save!
+          begin
+            local_collection.save!
+          rescue
+            puts local_collection
+            p local_collection
+          end
         end
 
         local_collections = Collection.where(account_id: account_id)
