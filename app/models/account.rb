@@ -50,6 +50,19 @@ class Account < ActiveRecord::Base
     InsalesAppCore.config.account_settings.set_value(self, name, val)
   end
 
+  # Была ли выполнена первоначальная синхронизация
+  def initial_sync_completed?
+    !!last_sync_date
+  end
+
+  # Время последней синхронизации
+  def last_sync_date
+    arr = [:orders, :products, :clients].map { |m| send("#{m}_last_sync") }
+    # Если по какому-то из ентити синхронизации не было, считаем, что ее не было вообще.
+    return nil if arr.index(nil)
+    arr.map { |m| DateTime.parse(m) }.max
+  end
+
   [:orders, :products, :clients].each do |ent|
     define_method ("#{ent}_last_sync") do
       (sync_settings || {})[ent.to_s]

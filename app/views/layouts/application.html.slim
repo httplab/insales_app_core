@@ -26,4 +26,8 @@ html
     #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
       = render 'layouts/flash_messages'
       .container-fluid
+        / Вешаем сообщение о том, что первоначальная синхронизация еще не была завершена
+        / если она не была завершена.
+        - unless current_account.initial_sync_completed?
+          .alert.alert-warning Первоначальная синхронизация с InSales еще не завершена.
         = yield
