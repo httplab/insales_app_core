@@ -15,6 +15,11 @@ html
           .navbar-header
             a.navbar-brand = app_name
 
+          ul.nav.navbar-nav.navbar-left
+            li
+              = link_to auth_insales_admin_url_for('/admin'), id: 'go-to-insales-btn', target: '_blank' do
+                = image_tag 'insales_app_core/insales_logo.png'
+                | Бэкофис
           ul.nav.navbar-nav.navbar-right
             li: p.navbar-text = current_account.insales_subdomain
             li = link_to 'Выйти', session_path, method: :delete
