@@ -31,6 +31,8 @@ class InsalesAppCore::AccountSetting::AccountSettingsCollection
       raise "Trying to set unknown setting '#{name}'"
     end
 
+    value = false if setting.type == :boolean && setting.control == :checkbox && setting.required && value.nil?
+
     if value.nil? && setting.required
       raise "Nil value for required setting '#{name}'"
     end

@@ -10,7 +10,7 @@ class InsalesAppCore::AccountSetting
       val = @default_value.respond_to?(:call) ? @default_value.call(acc) : @default_value
       if val.nil?
         return nil
-      else 
+      else
         val = get_value(val, acc)
         acc.set_setting(self.name, val)
         return val
@@ -20,13 +20,24 @@ class InsalesAppCore::AccountSetting
     case @type
     when :integer
       raw_value.to_i
+    when :boolean
+      [1, '1', 'true', true, 'on', :on, :true].include?(raw_value)
     else
       raw_value
     end
   end
 
   def prepare_value(user_value)
-    user_value
+    case @type
+    when :boolean
+      if [1, '1', 'true', true, 'on', :on, :true].include?(user_value)
+        'true'
+      else
+        'false'
+      end
+    else
+      user_value
+    end
   end
 
   def default_value(val = nil, &block)
@@ -44,5 +55,5 @@ class InsalesAppCore::AccountSetting
       @allowed_values
     end
   end
-  
+
 end
