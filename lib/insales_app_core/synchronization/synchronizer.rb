@@ -385,7 +385,7 @@ module InsalesAppCore
       def self.update_event(entity, account_id, remote_entity = nil)
         changed
         if entity.new_record? || entity.changed?
-          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity)
+          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity, account_id)
         else
           notify_observers(ENTITY_INTACT, entity, remote_entity, account_id)
         end
