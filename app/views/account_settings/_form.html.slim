@@ -1,6 +1,8 @@
 -case setting.control
 -when :select
   =select_tag setting.name, options_for_select(setting.allowed_values(current_account), current_account.get_setting(setting.name))
+-when :checkbox
+  =check_box_tag setting.name, '1', current_account.get_setting(setting.name)
 -else
   =text_field_tag setting.name, current_account.get_setting(setting.name)
 

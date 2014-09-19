@@ -14,6 +14,6 @@ class Order < ActiveRecord::Base
                   :cookies => nil
 
   def client_name
-    client.full_name
+    client.try(:full_name)
   end
 end

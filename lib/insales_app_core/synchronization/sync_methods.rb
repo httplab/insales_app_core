@@ -31,10 +31,14 @@ module InsalesAppCore
 
       def sync_all(acc)
         stage("Synchroniznig account #{acc.insales_subdomain}")
+
+        stage('Synchroniznig collections')
+        sync_collections(acc.id)
+                
         stage('Synchroniznig categories')
         sync_categories(acc.id)
-        stage('Synchroniznig products')
 
+        stage('Synchroniznig products')
         acc.products_last_sync = DateTime.now
         sync_products(acc.id)
         acc.save!
@@ -54,8 +58,13 @@ module InsalesAppCore
 
       def sync_all_recent(acc)
         stage("Synchroniznig account #{acc.insales_subdomain}")
+
+        stage('Synchroniznig collections')
+        sync_collections(acc.id)
+
         stage('Synchroniznig categories')
         sync_categories(acc.id)
+
         stage('Synchroniznig recent products')
         ls = acc.products_last_sync
         acc.products_last_sync = DateTime.now

@@ -2,6 +2,22 @@ body {
   padding-top: 60px;
 }
 
+#go-to-insales-btn {
+  margin-top: 7px;
+  border: solid 1px $gray;
+  height: 35px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: #000;
+  img {
+    // FIXME: Хорошо бы вырезать картинку нужного размера.
+    width: 12px;
+    height: 22px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+}
+
 #main-menu {
   margin-bottom: 20px;
 }

@@ -48,5 +48,14 @@ InsalesAppCore.setup do |config|
       s.control = :text_field
       s.required = false
     end
+
+    as.setting do |s|
+      s.name = :always_sync_all
+      s.title = 'Всегда синхронизировать всё'
+      s.type = :boolean
+      s.control = :checkbox
+      s.required = true
+      s.default_value true
+    end
   end
 end

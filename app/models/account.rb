@@ -3,6 +3,7 @@ class Account < ActiveRecord::Base
   validates :insales_id, :insales_subdomain, uniqueness: true
 
   has_many :categories
+  has_many :collections
   has_many :products
   has_many :variants
   has_many :images
@@ -47,6 +48,19 @@ class Account < ActiveRecord::Base
 
   def set_setting(name, val)
     InsalesAppCore.config.account_settings.set_value(self, name, val)
+  end
+
+  # Была ли выполнена первоначальная синхронизация
+  def initial_sync_completed?
+    !!last_sync_date
+  end
+
+  # Время последней синхронизации
+  def last_sync_date
+    arr = [:orders, :products, :clients].map { |m| send("#{m}_last_sync") }
+    # Если по какому-то из ентити синхронизации не было, считаем, что ее не было вообще.
+    return nil if arr.index(nil)
+    arr.map { |m| DateTime.parse(m) }.max
   end
 
   [:orders, :products, :clients].each do |ent|

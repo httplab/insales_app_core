@@ -1,0 +1,31 @@
+doctype html
+
+html
+  head
+    title = render_title
+    = stylesheet_link_tag 'application'
+    = javascript_include_tag 'application'
+    = csrf_meta_tags
+
+  body
+    #navbar
+      nav.navbar.navbar-inverse.navbar-fixed-top role='navigation'
+        .container-fluid
+          .navbar-header
+            a.navbar-brand = app_name
+          ul.nav.navbar-nav.navbar-right
+            li = link_to 'Войти', new_session_path
+
+    #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
+      .container-fluid
+        = yield
+
+      #unlogged-modal.modal.fade
+        .modal-dialog
+          .modal-content
+            .modal-header
+              button type="button" class="close" data-dismiss="modal" aria-hidden="true" &times;
+              h4.modal-title Установите приложение
+            .modal-body.text-center
+              p
+                ' Эта ссылка доступна только после установки приложения.
