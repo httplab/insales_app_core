@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '~> 4.1.0'
   s.add_dependency 'has_scope'
-  # s.add_dependency 'insales_api'
+  s.add_dependency 'parallel'
   s.add_dependency 'active_link_to'
   s.add_dependency 'slim-rails'
   s.add_dependency 'styx'

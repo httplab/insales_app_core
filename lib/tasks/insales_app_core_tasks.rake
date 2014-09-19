@@ -1,7 +1,7 @@
 require('colorize')
+require('parallel')
 
 class CoreSyncObserver
-
   def self.update(type, *args)
     case type
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
@@ -58,21 +58,14 @@ namespace :insales_sync do
   desc 'Synchronize all recently modified Insales entities for all accounts'
   task all_recent: :environment do
     prevent_multiple_executions do
-      threads = []
-      Account.all.each do |a|
-        threads << Thread.new(a) do |a|
+      Parallel.each(Account.all, in_process: 8) do |a|
+        ActiveRecord::Base.connection_pool.with_connection do
           a.configure_api
           syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
           syncronizer.add_observer(CoreSyncObserver)
           syncronizer.sync_all_recent(a)
         end
       end
-
-      threads.each { |t| t.join }
-
-      # syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
-      # syncronizer.add_observer(CoreSyncObserver)
-      # syncronizer.sync_all_accounts_recent
     end
   end
 
