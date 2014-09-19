@@ -34,7 +34,7 @@ module InsalesAppCore
 
         stage('Synchroniznig collections')
         sync_collections(acc.id)
-                
+
         stage('Synchroniznig categories')
         sync_categories(acc.id)
 
