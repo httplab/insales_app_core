@@ -32,7 +32,7 @@ module InsalesAppCore
             insales_class_arg = nil
           end
 
-          @insales_class = insales_class_arg || Kernel.const_get('InsalesApi::' + self.name)
+          @insales_class_arg = insales_class_arg
           @maps_to_insales = true
           field_mapping[:id] = :insales_id
           field_mapping.merge!(fields_arg || {})
@@ -66,7 +66,9 @@ module InsalesAppCore
         end
 
         def insales_class
-          @insales_class
+          # Такая странная схема, т.к. при инициализации приложения, например, InsalesApi::Order::ShippingAddress
+          # отсутствует, он появится только после запроса к API Insales
+          @insales_class ||= @insales_class_arg || Kernel.const_get('InsalesApi::' + self.name)
         end
       end
     end

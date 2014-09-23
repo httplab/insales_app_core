@@ -174,7 +174,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_one_order(remote_order, account_id)
+      def sync_one_order(remote_order, account_id)
         insales_client_id = remote_order.client.id
         # Если случилось так, что клиента нет в БД (это может произойти если заказ был создан после того,
         # как мы синхронизировали клиенты, но еще не начали синхронизировать заказы).
@@ -258,7 +258,7 @@ module InsalesAppCore
       end
 
       def sync_order_shipping_address(remote_shipping_address, account_id, order_id)
-        sa = ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
+        sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
         sa.save!
       end
 
