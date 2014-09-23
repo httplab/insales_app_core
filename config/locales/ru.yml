@@ -15,7 +15,8 @@ ru:
     delivered: 'доставлен'
     dispatched: 'отгружен'
     approved: 'согласован'
-    accepted: 'принят'
+    accepted: 'в обработке'
+    returned: 'возврат'
 
   order_financial_status:
     pending: не оплачен
