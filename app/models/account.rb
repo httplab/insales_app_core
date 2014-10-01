@@ -21,7 +21,7 @@ class Account < ActiveRecord::Base
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = InsalesApi::App.password_by_token(params[:token])
 
-    Account.exists(insales_subdomain: shop, insales_password: password, deleted: false)
+    Account.exists?(insales_subdomain: shop, insales_password: password, deleted: false)
   end
 
 
