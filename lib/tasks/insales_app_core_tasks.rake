@@ -58,7 +58,7 @@ namespace :insales_sync do
   desc 'Synchronize all recently modified Insales entities for all accounts'
   task all_recent: :environment do
     prevent_multiple_executions do
-      Parallel.each(Account.all, in_process: 8) do |a|
+      Parallel.each(Account.for_sync.all, in_process: 8) do |a|
         ActiveRecord::Base.connection_pool.with_connection do
           a.configure_api
           syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
