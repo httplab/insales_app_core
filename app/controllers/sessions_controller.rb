@@ -22,12 +22,7 @@ class SessionsController < ApplicationController
 
   def autologin
     if current_insales_app && current_insales_app.authorize(params[:token])
-      if after_sign_in_location.present?
-        redirect_to after_sign_in_location
-        clear_after_sign_in_location
-      else
-        redirect_to root_path
-      end
+      redirect_to root_path
     else
       redirect_to new_session_path
     end
