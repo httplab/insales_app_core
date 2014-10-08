@@ -34,7 +34,7 @@ module InsalesAppCore
 
         stage('Synchroniznig collections')
         sync_collections(acc.id)
-                
+
         stage('Synchroniznig categories')
         sync_categories(acc.id)
 
@@ -74,10 +74,10 @@ module InsalesAppCore
         stage('Synchroniznig fields')
         sync_fields(acc.id)
 
-        stage('Synchroniznig clients')
+        stage('Synchroniznig recent clients')
         ls = acc.clients_last_sync
         acc.clients_last_sync = DateTime.now
-        sync_clients(acc.id)
+        sync_clients(acc.id, ls)
 
         stage('Synchroniznig recent orders')
         ls = acc.orders_last_sync
