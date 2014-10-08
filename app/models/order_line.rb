@@ -5,6 +5,7 @@ class OrderLine < ActiveRecord::Base
   belongs_to :order, dependent: :delete
   belongs_to :account
   belongs_to :variant
+  belongs_to :product
 
   maps_to_insales product_id: :insales_product_id,
                   variant_id: :insales_variant_id
