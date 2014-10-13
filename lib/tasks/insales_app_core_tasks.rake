@@ -2,7 +2,7 @@ require('colorize')
 require('parallel')
 
 class CoreSyncObserver
-  def self.update(type, *args)
+  def update(type, *args)
     case type
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
       str = "+"
@@ -48,45 +48,49 @@ class CoreSyncObserver
 end
 
 namespace :insales_sync do
-  desc 'Synchronize all Insales entities for all accounts'
-  task all: :environment do
-    prevent_multiple_executions do
-      ::InsalesAppCore::Synchronization::Synchronizer.sync_all_accounts
-    end
-  end
+  # desc 'Synchronize all Insales entities for all accounts'
+  # task all: :environment do
+  #   prevent_multiple_executions do
+  #     ::InsalesAppCore::Synchronization::Synchronizer.sync_all_accounts
+  #   end
+  # end
 
   desc 'Synchronize all recently modified Insales entities for all accounts'
   task all_recent: :environment do
     prevent_multiple_executions do
+      observers = InsalesAppCore.config.sync_observers_classes
+
       Parallel.each(Account.for_sync.all, in_process: 3) do |a|
         ActiveRecord::Base.connection_pool.with_connection do
           a.configure_api
           syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new
-          syncronizer.add_observer(CoreSyncObserver)
+          syncronizer.add_observer(CoreSyncObserver.new)
+          observers.each { |clazz| syncronizer.add_observer(clazz.new) }
           syncronizer.sync_all_recent(a)
         end
       end
     end
   end
 
-  desc 'Synchronize all recently modified Insales orders for all accounts'
-  task orders_recent: :environment do
-    prevent_multiple_executions do
-      ::InsalesAppCore::Synchronization::Synchronizer.sync_recent_orders
-    end
-  end
+  # TODO: Исправить реализацию на экземплярный вариант.
+  # desc 'Synchronize all recently modified Insales orders for all accounts'
+  # task orders_recent: :environment do
+  #   prevent_multiple_executions do
+  #     ::InsalesAppCore::Synchronization::Synchronizer.sync_recent_orders
+  #   end
+  # end
 
-  desc 'Synchronize all recently modified Insales products for all accounts'
-  task products_recent: :environment do
-    prevent_multiple_executions do
-      ::InsalesAppCore::Synchronization::Synchronizer.sync_recent_products
-    end
-  end
+  # desc 'Synchronize all recently modified Insales products for all accounts'
+  # task products_recent: :environment do
+  #   prevent_multiple_executions do
+  #     ::InsalesAppCore::Synchronization::Synchronizer.sync_recent_products
+  #   end
+  # end
 
-  desc 'Synchronize all Insales orders for all accounts'
-  task orders: :environment do
-    prevent_multiple_executions do
-      ::InsalesAppCore::Synchronization::Synchronizer.sync_all_orders
-    end
-  end
+  # desc 'Synchronize all Insales orders for all accounts'
+  # task orders: :environment do
+  #   prevent_multiple_executions do
+  #     ::InsalesAppCore::Synchronization::Synchronizer.sync_all_orders
+  #   end
+  # end
 end

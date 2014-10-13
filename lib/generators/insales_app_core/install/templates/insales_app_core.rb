@@ -5,6 +5,8 @@ InsalesAppCore.setup do |config|
   config.insales_api_host = ENV['INSALES_API_HOST']
   config.insales_api_autologin_path = ENV['INSALES_API_AUTOLOGIN_PATH']
 
+  # Добавить в виде строк имена обзерверов для синхронизации.
+  # config.sync_observers = ['AppNamespace::OrdersObserver']
 
   # Левая часть главного меню. Предполагаем, что в левой части основная навигация,
   # пункты ведущие на страницы обспечивающие основную функциональность приложения.

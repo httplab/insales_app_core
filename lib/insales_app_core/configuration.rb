@@ -6,6 +6,8 @@ module InsalesAppCore
                   :insales_api_autologin_path
 
 
+    attr_accessor :sync_observers
+
     def initialize(&blk)
       blk.call self if block_given?
 
@@ -28,9 +30,14 @@ module InsalesAppCore
 
     def account_settings(&block)
       if block_given?
-        @account_settings = InsalesAppCore::AccountSetting::AccountSettingsCollection.new(&block) 
+        @account_settings = InsalesAppCore::AccountSetting::AccountSettingsCollection.new(&block)
       end
       @account_settings
+    end
+
+    def sync_observers_classes
+      return [] unless sync_observers.present?
+      @sync_observers_classes ||= sync_observers.map { |n| Kernel.const_get(n) }
     end
 
     private
