@@ -14,7 +14,7 @@ module InsalesAppCore
 
         # Если приложение Insales висит в API и авторизовано, просто ищем нужный акконут.
         if current_insales_app && current_insales_app.authorized?
-          return if self.current_account = Account.find_by_insales_subdomain(current_insales_app.shop)
+          return if self.current_account = Account.where(deleted: false).find_by_insales_subdomain(current_insales_app.shop)
         end
 
         # В противном случае предполагаем, что нужная информация есть в params
@@ -46,10 +46,10 @@ module InsalesAppCore
 
       def authorize_by_params!
         self.current_account = if params[:insales_id]
-          Account.find_by_insales_id(params[:insales_id])
+          Account.where(deleted: false).find_by_insales_id(params[:insales_id])
         else
           shop_wo_http = (params[:shop] || "")[/[\w\d-]+\.myinsales.ru/]
-          Account.find_by_insales_subdomain(InsalesApi::App.prepare_shop(shop_wo_http))
+          Account.where(deleted: false).find_by_insales_subdomain(InsalesApi::App.prepare_shop(shop_wo_http))
         end
 
         return nil unless @current_account

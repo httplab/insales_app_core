@@ -3,9 +3,9 @@ require_relative 'sync_methods'
 
 module InsalesAppCore
   module Synchronization
-    module Synchronizer
-      extend Observable
-      extend ::InsalesAppCore::Synchronization::SyncMethods
+    class Synchronizer
+      include Observable
+      include ::InsalesAppCore::Synchronization::SyncMethods
 
       ENTITY_INTACT = 0
       ENTITY_CREATED = 1
@@ -17,7 +17,7 @@ module InsalesAppCore
       REQUEST = 7
       BEGIN_SYNC = 8
 
-      def self.safe_api_call(&block)
+      def safe_api_call(&block)
         begin
           request(nil)
           yield
@@ -32,7 +32,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_categories(account_id)
+      def sync_categories(account_id)
         remote_categories = safe_api_call{InsalesApi::Category.all}
 
         remote_categories.each do |remote_category|
@@ -58,69 +58,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_collections(account_id)
-        remote_collections = safe_api_call{InsalesApi::Collection.all}
-
-        remote_collections.each do |remote_collection|
-          local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
-          update_event(local_collection, account_id, remote_collection)
-          begin
-            local_collection.save!
-          rescue
-            puts local_collection
-            p local_collection
-          end
-        end
-
-        local_collections = Collection.where(account_id: account_id)
-        remote_collections_ids = Set.new(remote_collections.map(&:id))
-        tree_map = Collection.ids_map
-
-        local_collections.each do |local_collection|
-          if !remote_collections_ids.include?(local_collection.insales_id)
-            changed
-            notify_observers(ENTITY_DELETED, local_collection, nil, account_id)
-            local_collection.delete
-            next
-          end
-
-          local_collection.parent_id = tree_map[local_collection.insales_parent_id]
-          begin
-            local_collection.save!
-          rescue
-            puts local_collection
-            p local_collection
-          end
-        end
-      end
-
-      def self.sync_collects(account_id)
-        remote_pairs = []
-        collection_map = Collection.ids_map
-        product_map = Product.ids_map
-
-        get_paged(InsalesApi::Collect, 1000) do |page_result|
-          page_result.each do |c|
-            c_id = collection_map[c.collection_id]
-            p_id = product_map[c.product_id]
-            remote_pairs << [c_id, p_id] if c_id && p_id
-          end
-        end
-
-        local_pairs = Collect.where('account_id = ?', account_id).pluck(:collection_id, :product_id)
-
-        pairs_to_delete = local_pairs - remote_pairs
-        pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]},#{p[1]})"}.join(',')
-        Collect.where('(collection_id, product_id) IN (?)', pairs_to_delete).delete_all if pairs_to_delete.present?
-
-        pairs_to_create = remote_pairs - local_pairs
-        values_clause = pairs_to_create.map {|v| "(#{v[0]},#{v[1]},#{account_id})"}.join(',')
-        if pairs_to_create.any?
-          Collect.connection.execute("INSERT INTO collects (collection_id, product_id, account_id) VALUES #{values_clause}")
-        end
-      end
-
-      def self.sync_products(account_id, updated_since = nil)
+      def sync_products(account_id, updated_since = nil)
         remote_ids = []
         @category_map = Category.ids_map
 
@@ -154,7 +92,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_variants(account_id, remote_product, local_product)
+      def sync_variants(account_id, remote_product, local_product)
         remote_variants = remote_product.variants
         remote_ids = remote_variants.map(&:id)
 
@@ -178,7 +116,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_images(account_id, insales_product, local_product)
+      def sync_images(account_id, insales_product, local_product)
         remote_images = insales_product.images
 
         remote_images.each do |remote_image|
@@ -203,7 +141,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_fields(account_id)
+      def sync_fields(account_id)
         remote_fields = safe_api_call{InsalesApi::Field.all}
         remote_ids = remote_fields.map(&:id)
         remote_fields.each do |remote_field|
@@ -219,7 +157,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_orders(account_id, updated_since = nil)
+      def sync_orders(account_id, updated_since = nil)
         remote_ids = []
         puts updated_since
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
@@ -236,7 +174,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_one_order(remote_order, account_id)
+      def sync_one_order(remote_order, account_id)
         insales_client_id = remote_order.client.id
         # Если случилось так, что клиента нет в БД (это может произойти если заказ был создан после того,
         # как мы синхронизировали клиенты, но еще не начали синхронизировать заказы).
@@ -275,7 +213,7 @@ module InsalesAppCore
         false
       end
 
-      def self.sync_fields_values(remote_fields_values, account_id, owner_id)
+      def sync_fields_values(remote_fields_values, account_id, owner_id)
         remote_ids = remote_fields_values.map(&:id)
         @fields_map = Field.ids_map
 
@@ -285,7 +223,7 @@ module InsalesAppCore
           next if local_field_id.nil?
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
             account_id: account_id, owner_id: owner_id, field_id: local_field_id)
-          update_event(local_fields_value, remote_fields_value, account_id)
+          update_event(local_fields_value, account_id, remote_fields_value)
           local_fields_value.save!(:validate => false)
         end
 
@@ -296,7 +234,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
+      def sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
         remote_ids = remote_order_lines.map(&:id)
         @products_map = Product.ids_map
         @variants_map = Variant.ids_map
@@ -319,12 +257,12 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_order_shipping_address(remote_shipping_address, account_id, order_id)
-        sa = ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
+      def sync_order_shipping_address(remote_shipping_address, account_id, order_id)
+        sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
         sa.save!
       end
 
-      def self.sync_clients(account_id, updated_since = nil)
+      def sync_clients(account_id, updated_since = nil)
         remote_ids = []
         puts updated_since
         get_paged(InsalesApi::Client, 250, updated_since: updated_since) do |page_result|
@@ -341,7 +279,7 @@ module InsalesAppCore
         end
       end
 
-      def self.sync_one_client(remote_client, account_id)
+      def sync_one_client(remote_client, account_id)
         unless remote_client.is_a? InsalesApi::Client
           remote_client = InsalesApi::Client.find remote_client
         end
@@ -357,8 +295,65 @@ module InsalesAppCore
         p local_client.attributes
       end
 
+      def sync_collections(account_id)
+        remote_collections = safe_api_call{InsalesApi::Collection.all}
+
+        remote_collections.each do |remote_collection|
+          local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
+          update_event(local_collection, account_id)
+          local_collection.save!
+        end
+
+        local_collections = Collection.where(account_id: account_id)
+        remote_collections_ids = Set.new(remote_collections.map(&:id))
+        tree_map = Collection.ids_map
+
+        local_collections.each do |local_collection|
+          if !remote_collections_ids.include?(local_collection.insales_id)
+            changed
+            notify_observers(ENTITY_DELETED, local_collection)
+            local_collection.delete
+            next
+          end
+
+          local_collection.parent_id = tree_map[local_collection.insales_parent_id]
+          begin
+            local_collection.save!
+          rescue
+            puts local_collection
+            p local_collection
+          end
+        end
+      end
+
+      def sync_collects(account_id)
+        remote_pairs = []
+        collection_map = Collection.ids_map
+        product_map = Product.ids_map
+
+        get_paged(InsalesApi::Collect, 1000) do |page_result|
+          page_result.each do |c|
+            c_id = collection_map[c.collection_id]
+            p_id = product_map[c.product_id]
+            remote_pairs << [c_id, p_id] if c_id && p_id
+          end
+        end
+
+        local_pairs = Collect.where('account_id = ?', account_id).pluck(:collection_id, :product_id)
+
+        pairs_to_delete = local_pairs - remote_pairs
+        pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]},#{p[1]})"}.join(',')
+        Collect.where('(collection_id, product_id) IN (?)', pairs_to_delete).delete_all if pairs_to_delete.present?
+
+        pairs_to_create = remote_pairs - local_pairs
+        values_clause = pairs_to_create.map {|v| "(#{v[0]},#{v[1]},#{account_id})"}.join(',')
+        if pairs_to_create.any?
+          Collect.connection.execute("INSERT INTO collects (collection_id, product_id, account_id) VALUES #{values_clause}")
+        end
+      end
+
       # Постраничное получение сущностей
-      def self.get_paged(type, page_size = nil, addl_params = {})
+      def get_paged(type, page_size = nil, addl_params = {})
         page = 1
         while true do
           params = {
@@ -382,7 +377,7 @@ module InsalesAppCore
       end
 
       # Методы для оповещения наблюдателей
-      def self.update_event(entity, account_id, remote_entity = nil)
+      def update_event(entity, account_id, remote_entity = nil)
         changed
         if entity.new_record? || entity.changed?
           notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity, account_id)
@@ -391,22 +386,22 @@ module InsalesAppCore
         end
       end
 
-      def self.stage(stage)
+      def stage(stage)
         changed
         notify_observers(STAGE, stage)
       end
 
-      def self.request(request)
+      def request(request)
         changed
         notify_observers(REQUEST, request)
       end
 
-      def self.end_sync
+      def end_sync
         changed
         notify_observers(END_SYNC)
       end
 
-      def self.begin_sync
+      def begin_sync
         changed
         notify_observers(BEGIN_SYNC)
       end

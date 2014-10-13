@@ -3,6 +3,10 @@ module InsalesAppCore
     module InsalesEntity
       extend ActiveSupport::Concern
 
+      included do
+        include InsalesAppCore::ModelExtensions::Synced
+      end
+
       def set_attributes_by_insales_entity(insales_entity, attributes = {})
         local_attributes = attribute_names.map(&:to_sym)
 
@@ -21,11 +25,17 @@ module InsalesAppCore
       end
 
       module ClassMethods
+        def maps_to_insales(*args)
+          insales_class_arg, fields_arg = *args
+          if insales_class_arg.is_a? Hash
+            fields_arg = insales_class_arg
+            insales_class_arg = nil
+          end
 
-        def maps_to_insales(fields = {})
+          @insales_class_arg = insales_class_arg
           @maps_to_insales = true
           field_mapping[:id] = :insales_id
-          field_mapping.merge!(fields)
+          field_mapping.merge!(fields_arg || {})
         end
 
         def ids_map
@@ -55,6 +65,11 @@ module InsalesAppCore
           @field_mapping ||= {}
         end
 
+        def insales_class
+          # Такая странная схема, т.к. при инициализации приложения, например, InsalesApi::Order::ShippingAddress
+          # отсутствует, он появится только после запроса к API Insales
+          @insales_class ||= @insales_class_arg || Kernel.const_get('InsalesApi::' + self.name)
+        end
       end
     end
   end

@@ -1,6 +1,10 @@
 ru:
   default_app_name: Приложение для InSales
 
+  time:
+    formats:
+      insales_long: "%d.%m.%Y %H:%M"
+
   cancel: Отмена
   'true': да
   'false': нет
@@ -11,7 +15,8 @@ ru:
     delivered: 'доставлен'
     dispatched: 'отгружен'
     approved: 'согласован'
-    accepted: 'принят'
+    accepted: 'в обработке'
+    returned: 'возврат'
 
   order_financial_status:
     pending: не оплачен

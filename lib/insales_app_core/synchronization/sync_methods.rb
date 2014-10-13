@@ -3,7 +3,7 @@ module InsalesAppCore
     module SyncMethods
 
       def all_accounts(&block)
-        Account.all.each do |acc|
+        Account.for_sync.all.each do |acc|
           acc.configure_api
           yield acc
         end

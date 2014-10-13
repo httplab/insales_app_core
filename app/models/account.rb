@@ -1,6 +1,5 @@
 class Account < ActiveRecord::Base
   validates :insales_id, :insales_password, :insales_subdomain, presence: true
-  validates :insales_id, :insales_subdomain, uniqueness: true
 
   has_many :categories
   has_many :collections
@@ -11,7 +10,20 @@ class Account < ActiveRecord::Base
   has_many :order_lines
   has_many :fields
   has_many :fields_values
-  has_many :settings, class_name: 'AccountSettings', dependent: :destroy
+  has_many :settings, class_name: 'AccountSettings'
+
+  before_update :set_deleted_at, if: 'deleted_changed?'
+
+  scope :for_sync, -> { where(deleted: false) }
+
+
+  def self.installed?(params)
+    shop = InsalesApi::App.prepare_shop(params[:shop])
+    password = InsalesApi::App.password_by_token(params[:token])
+
+    Account.exists?(insales_subdomain: shop, insales_password: password, deleted: false)
+  end
+
 
   def self.create_by_insales_request!(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
@@ -25,11 +37,13 @@ class Account < ActiveRecord::Base
     end
   end
 
-  def self.destroy_by_insales_request!(params)
+  def self.set_deleted_by_insales_request!(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = params[:token]
 
-    Account.find_by!(insales_subdomain: shop, insales_password: password).destroy!
+    a = Account.find_by!(insales_subdomain: shop, insales_password: password, deleted: false)
+    a.deleted = true
+    a.save!
   end
 
   def create_app
@@ -78,6 +92,14 @@ class Account < ActiveRecord::Base
   def tariff_info
     tariff_conf = Tariffication.config[tariff_id]
     tariff_conf.instance(id) if tariff_conf
+  end
+
+  def set_deleted_at
+    if deleted?
+      self.deleted_at = DateTime.now
+    else
+      self.deleted_at = nil
+    end
   end
 end
 
