@@ -1,0 +1,2 @@
+module InsalesAppCore::Admin
+end

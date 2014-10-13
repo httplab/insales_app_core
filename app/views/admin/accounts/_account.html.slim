@@ -1,0 +1,10 @@
+tr
+  td = account.insales_subdomain
+  td = account.products.count
+  td = account.orders.count
+  td = I18n.l(account.created_at, format: :long)
+  td
+    - if account.last_sync_date
+      = I18n.l(account.last_sync_date, format: :long)
+    - else
+      'Не синхронизировано
