@@ -1,3 +1,29 @@
+GIT
+  remote: git@github.com:Shopify/activeresource.git
+  revision: 1fc75fc9f0777800cef5863ddfdbb6483aae4baf
+  branch: threadsafe_v2
+  specs:
+    activeresource (4.0.0.threadsafe)
+      activemodel (~> 4.0)
+      activesupport (~> 4.0)
+      rails-observers (~> 0.1.2)
+
+GIT
+  remote: git@github.com:bootstrap-ruby/rails-bootstrap-forms.git
+  revision: 305263eb30d4f21b62f71bbde3ea47ed23235308
+  branch: master
+  specs:
+    bootstrap_form (2.0.1)
+
+GIT
+  remote: git@github.com:httplab/insales_api.git
+  revision: 4eea415c13020018e2c8eaade66c3835412d9c00
+  branch: threadsafe
+  specs:
+    insales_api (0.1.0.pre)
+      activeresource (>= 3.0.0)
+      activesupport (>= 3.0.0)
+
 PATH
   remote: .
   specs:
@@ -17,32 +43,6 @@ PATH
       slim-rails
       styx
       unicode
-
-GIT
-  remote: git@github.com:bootstrap-ruby/rails-bootstrap-forms.git
-  revision: 305263eb30d4f21b62f71bbde3ea47ed23235308
-  branch: master
-  specs:
-    bootstrap_form (2.0.1)
-
-GIT
-  remote: git@github.com:httplab/insales_api.git
-  revision: 4eea415c13020018e2c8eaade66c3835412d9c00
-  branch: threadsafe
-  specs:
-    insales_api (0.1.0.pre)
-      activeresource (>= 3.0.0)
-      activesupport (>= 3.0.0)
-
-GIT
-  remote: git@github.com:Shopify/activeresource.git
-  revision: 1fc75fc9f0777800cef5863ddfdbb6483aae4baf
-  branch: threadsafe_v2
-  specs:
-    activeresource (4.0.0.threadsafe)
-      activemodel (~> 4.0)
-      activesupport (~> 4.0)
-      rails-observers (~> 0.1.2)
 
 GEM
   remote: https://rubygems.org/
