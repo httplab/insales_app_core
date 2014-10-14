@@ -1,7 +1,25 @@
 tr
-  td = account.insales_subdomain
-  td = account.products.count
-  td = account.orders.count
+  td
+    = account.insales_subdomain
+    ' 
+    span.badge = I18n.t("account_active.#{!account.deleted}")
+  td
+    ul.list-group
+      li.list-group-item
+        span.badge = account.products.count
+        'Кол-во товаров
+      li.list-group-item
+        span.badge = account.orders.count
+        'Кол-во заказов
+      li.list-group-item
+        span.badge = account.clients.where(registered: true).count
+        'Кол-во зарегистрированных пользователей
+      li.list-group-item
+        span.badge = account.clients.where(registered: false).count
+        'Кол-во незарегистрированных пользователей
+      li.list-group-item
+        span.badge = account.tariff_id
+        'Тариф
   td = I18n.l(account.created_at, format: :long)
   td
     - if account.last_sync_date

@@ -5,6 +5,7 @@ class Admin::ApplicationController < ActionController::Base
   private
 
   def authenticate
+    return if Rails.env.development?
     if ENV['ADMIN_LOGIN'].blank? || ENV['ADMIN_PASSWORD'].blank?
       render text: 'Authentication not configured', status: :unauthorized
     else
