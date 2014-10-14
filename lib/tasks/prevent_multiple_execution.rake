@@ -5,7 +5,7 @@ def prevent_multiple_executions(&block)
 
   if File.exist?(lock_file)
     pid = File.read(lock_file).try(:to_i)
-    is_already_running = `ps xau | grep #{pid}`.split(' ').first.to_i == pid
+    is_already_running = `ps xau | grep #{pid}`.split(' ')[1].to_i == pid
 
     if is_already_running
       puts "Другой процесс <rake #{ARGV[0]}> уже запущен"
