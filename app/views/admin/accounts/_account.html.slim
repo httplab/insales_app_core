@@ -18,7 +18,7 @@ tr
         span.badge = account.clients.where(registered: false).count
         'Кол-во незарегистрированных пользователей
       li.list-group-item
-        span.badge = account.tariff_id
+        span.badge = account.tariff_id ? account.tariff_id : 'Не указан'
         'Тариф
   td = I18n.l(account.created_at, format: :long)
   td

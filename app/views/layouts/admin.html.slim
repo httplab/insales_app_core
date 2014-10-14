@@ -22,7 +22,9 @@ html
 
     #main-menu
       .container-fluid
-        = render_admin_menu
+        / Пока не ясно, каким требованиям должно удовлетворять это меню, поэтому использую
+        / функцию построения меню из пользовательской части приложения
+        = render_app_menu(InsalesAppCore::Admin.config)
 
     #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
       = render 'layouts/flash_messages'

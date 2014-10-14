@@ -26,7 +26,7 @@ html
 
     #main-menu
       .container-fluid
-        = render_app_menu
+        = render_app_menu(InsalesAppCore.config)
 
     #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
       = render 'layouts/flash_messages'
