@@ -236,8 +236,8 @@ module InsalesAppCore
 
       def sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
         remote_ids = remote_order_lines.map(&:id)
-        @products_map = Product.ids_map
-        @variants_map = Variant.ids_map
+        @products_map ||= Product.ids_map
+        @variants_map ||= Variant.ids_map
 
         remote_order_lines.each do |remote_order_line|
           local_product_id = @products_map[remote_order_line.product_id.to_i]
@@ -247,7 +247,7 @@ module InsalesAppCore
             account_id: account_id, order_id: order_id, product_id: local_product_id,
             variant_id: local_variant_id, insales_order_id: insales_order_id)
           update_event(local_order_line, account_id, remote_order_line)
-          local_order_line.save!
+          local_order_line.save!(validate: false)
         end
 
         if remote_ids.any?
