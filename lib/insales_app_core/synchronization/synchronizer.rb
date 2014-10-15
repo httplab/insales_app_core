@@ -215,7 +215,7 @@ module InsalesAppCore
 
       def sync_fields_values(remote_fields_values, account_id, owner_id)
         remote_ids = remote_fields_values.map(&:id)
-        @fields_map = Field.ids_map
+        @fields_map ||= Field.ids_map
 
         remote_fields_values.each do |remote_fields_value|
 
@@ -259,7 +259,7 @@ module InsalesAppCore
 
       def sync_order_shipping_address(remote_shipping_address, account_id, order_id)
         sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
-        sa.save!
+        sa.save!(validate: false)
       end
 
       def sync_clients(account_id, updated_since = nil)
