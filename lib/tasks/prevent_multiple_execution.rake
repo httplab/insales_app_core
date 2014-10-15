@@ -3,6 +3,9 @@ def prevent_multiple_executions(&block)
   shared_root = File.join(Rails.root.to_s.split('releases').first, 'shared')
   lock_file = File.join(shared_root, 'tmp', scope_name + "_lock.txt")
 
+  puts 'prevent_multiple_executions --------------'
+  puts lock_file
+
   if File.exist?(lock_file)
     pid = File.read(lock_file).try(:to_i)
     is_already_running = `ps xau | grep #{pid}`.split(' ')[1].to_i == pid
