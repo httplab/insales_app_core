@@ -32,3 +32,20 @@ InsalesAppCore.setup do |config|
     # m.add_item 'Помощь', '/help'
   end
 end
+
+InsalesAppCore::Admin.setup do |config|
+  # Левая часть главного меню. Предполагаем, что в левой части основная навигация,
+  # пункты ведущие на страницы обспечивающие основную функциональность приложения.
+  config.left_menu do |m|
+    # Добавить ссылку на "главную" с иконкой-домиком.
+    # m.add_home
+    m.add_item 'Аккаунты', '/admin/accounts'
+  end
+
+  # Правая часть главного меню. Предполагаем, что в правой части будут различные сервисные
+  # ссылки вроде "Помощь", "Настройки".
+  config.right_menu do |m|
+    # m.add_item 'Настройки', '/account_settings/edit'
+    # m.add_item 'Помощь', '/pages/help'
+  end
+end

@@ -1,0 +1,19 @@
+.row
+  .col-md-4
+    ul.list-group
+      li.list-group-item
+        span.badge = @accounts.where(deleted: false).count
+        'Кол-во действующих аккаунтов
+      li.list-group-item
+        span.badge = @accounts.where(deleted: true).count
+        'Кол-во деинсталлированных аккаунтов
+
+table.table.table-bordered.table-striped
+  thead
+    tr
+      th Домен
+      th Описание
+      th Дата установки
+      th Дата синхронизации
+  = render @accounts
+

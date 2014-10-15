@@ -1,7 +1,7 @@
 module AppMenuHelper
-  def render_app_menu
-    left_menu = InsalesAppCore.config.left_menu
-    right_menu = InsalesAppCore.config.right_menu
+  def render_app_menu(config)
+    left_menu = config.left_menu
+    right_menu = config.right_menu
 
     # Расставляем признаки активности для пунктов меню исходя из текущего request.path
     left_menu.set_active_flags(request.path)

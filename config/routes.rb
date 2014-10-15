@@ -14,5 +14,10 @@ Rails.application.routes.draw do
     get :tree, on: :collection
   end
 
+  namespace :admin do
+    resources :accounts, only: :index
+    root to: redirect('/admin/accounts')
+  end
+
   get "/pages/*id" => 'pages#show', format: false
 end

@@ -11,6 +11,7 @@ class Account < ActiveRecord::Base
   has_many :fields
   has_many :fields_values
   has_many :settings, class_name: 'AccountSettings'
+  has_many :clients
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
