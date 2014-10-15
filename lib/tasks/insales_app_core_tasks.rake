@@ -7,13 +7,13 @@ class CoreSyncObserver
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED
       str = "+"
       if args[0].respond_to? :account_id
-        str = args[0].class.name[0] + args[0].account_id.to_s + ' '
+        str = args[0].class.to_s + '#' + args[0].id.to_s + ' account_id:' + args[0].account_id.to_s + "\n"
       end
       print str.green
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED
       str = "~"
       if args[0].respond_to? :account_id
-        str = args[0].class.name[0] + args[0].account_id.to_s + ' '
+        str = args[0].class.to_s + '#' + args[0].id.to_s + ' account_id:' + args[0].account_id.to_s + "\n"
       end
 
       print str.yellow
@@ -28,7 +28,7 @@ class CoreSyncObserver
     when ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_INTACT
       str = "."
       if args[0].respond_to? :account_id
-        str = args[0].class.name[0] + args[0].account_id.to_s + ' '
+        str = args[0].class.to_s + '#' + args[0].id.to_s + ' account_id:' + args[0].account_id.to_s + "\n"
       end
 
       print str
