@@ -241,6 +241,14 @@ module InsalesAppCore
            account_id, owner_id, remote_ids).delete_all
           notify_observers(ENTITY_DELETED, deleted)
         end
+      rescue => ex
+        puts ex.message
+        puts ex.backtrace
+        p local_fields_value
+        if local_fields_value
+          p local_fields_value.attributes
+        end
+        raise ex
       end
 
       def sync_order_lines(remote_order_lines, account_id, order_id, insales_order_id)
