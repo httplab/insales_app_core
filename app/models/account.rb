@@ -15,8 +15,10 @@ class Account < ActiveRecord::Base
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
-  scope :for_sync, -> { where(deleted: false) }
-
+  # TODO: Более оптимально вычислять был ли засинкан аккаунт
+  def self.for_sync
+    where(deleted: false).to_ary.select { |a| a.initial_sync_completed? }
+  end
 
   def self.installed?(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
