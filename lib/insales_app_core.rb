@@ -11,12 +11,22 @@ require 'insales_app_core/app_menu/menu_item'
 require_relative 'tariffication'
 require 'insales_app_core/account_setting'
 require 'insales_app_core/account_setting/account_settings_collection'
+require 'insales_app_core/admin'
+require 'insales_app_core/admin/configuration'
 
 module InsalesAppCore
   mattr_accessor :config
 
   def self.setup(&blk)
     self.config = InsalesAppCore::Configuration.new(&blk)
+  end
+
+  module Admin
+    mattr_accessor :config
+
+    def self.setup(&blk)
+      self.config = InsalesAppCore::Admin::Configuration.new(&blk)
+    end
   end
 end
 

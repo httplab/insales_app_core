@@ -1,0 +1,11 @@
+//= require rails_bootstrap_forms
+@import 'bootstrap';
+@import 'insales_app_core/theme';
+
+td .list-group {
+  margin-bottom: 0;
+
+  .list-group-item {
+    padding: 5px 10px;
+  }
+}

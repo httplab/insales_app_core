@@ -1,0 +1,33 @@
+doctype html
+
+html
+  head
+    title = render_title
+    / Если появится необходимость в дополнении ассетов приложением, тут нужно будет включить
+    / админские манифесты из приложения, в которых будут импортироваться эти асссеты
+    = stylesheet_link_tag 'insales_app_core_admin'
+    = javascript_include_tag 'insales_app_core_admin'
+    = csrf_meta_tags
+
+  body
+    #navbar
+      nav.navbar.navbar-inverse.navbar-fixed-top role='navigation'
+        .container-fluid
+          .navbar-header
+            = link_to 'Admin', admin_root_path, class: 'navbar-brand'
+            = link_to app_name, root_path, class: 'navbar-brand'
+
+          ul.nav.navbar-nav.navbar-left
+          ul.nav.navbar-nav.navbar-right
+
+    #main-menu
+      .container-fluid
+        / Пока не ясно, каким требованиям должно удовлетворять это меню, поэтому использую
+        / функцию построения меню из пользовательской части приложения
+        = render_app_menu(InsalesAppCore::Admin.config)
+
+    #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
+      = render 'layouts/flash_messages'
+      .container-fluid
+        = yield
+

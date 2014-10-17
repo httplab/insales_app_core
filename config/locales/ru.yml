@@ -9,6 +9,10 @@ ru:
   'true': да
   'false': нет
 
+  account_active:
+    'true': действующий
+    'false': деинсталлирован
+
   order_status:
     new: 'новый'
     declined: 'отклонён'
