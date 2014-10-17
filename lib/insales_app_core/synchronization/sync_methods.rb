@@ -1,137 +1,65 @@
 module InsalesAppCore
   module Synchronization
     module SyncMethods
+      def sync_all
+        acc = Account.find(account_id)
 
-      def all_accounts(&block)
-        Account.for_sync.all.each do |acc|
-          acc.configure_api
-          yield acc
-        end
-      end
-
-      def sync_all_accounts
-        begin_sync
-
-        all_accounts do |acc|
-          sync_all(acc)
-        end
-
-        end_sync
-      end
-
-      def sync_all_accounts_recent
-        begin_sync
-
-        all_accounts do |acc|
-          sync_all_recent(acc)
-        end
-
-        end_sync
-      end
-
-      def sync_all(acc)
         stage("Synchroniznig account #{acc.insales_subdomain}")
 
-        stage('Synchroniznig collections')
-        sync_collections(acc.id)
+        stage("Synchroniznig collections #{acc.insales_subdomain}")
+        sync_collections
 
-        stage('Synchroniznig categories')
-        sync_categories(acc.id)
+        stage("Synchroniznig categories #{acc.insales_subdomain}")
+        sync_categories
 
-        stage('Synchroniznig products')
+        stage("Synchroniznig products #{acc.insales_subdomain}")
         acc.products_last_sync = DateTime.now
-        sync_products(acc.id)
+        sync_products
         acc.save!
 
-        stage('Synchroniznig fields')
-        sync_fields(acc.id)
+        stage("Synchroniznig fields #{acc.insales_subdomain}")
+        sync_fields
 
-        stage('Synchroniznig clients')
+        stage("Synchroniznig clients #{acc.insales_subdomain}")
         acc.clients_last_sync = DateTime.now
-        sync_clients(acc.id)
+        sync_clients
 
-        stage('Synchroniznig orders')
+        stage("Synchroniznig orders #{acc.insales_subdomain}")
         acc.orders_last_sync = DateTime.now
-        sync_orders(acc.id)
+        sync_orders
         acc.save!
       end
 
-      def sync_all_recent(acc)
+      def sync_all_recent
+        acc = Account.find(account_id)
         stage("Synchroniznig account #{acc.insales_subdomain}")
 
-        stage('Synchroniznig collections')
-        sync_collections(acc.id)
+        stage("Synchroniznig collections #{acc.insales_subdomain}")
+        sync_collections
 
-        stage('Synchroniznig categories')
-        sync_categories(acc.id)
+        stage("Synchroniznig categories #{acc.insales_subdomain}")
+        sync_categories
 
-        stage('Synchroniznig recent products')
+        stage("Synchroniznig recent products #{acc.insales_subdomain}")
         ls = acc.products_last_sync
         acc.products_last_sync = DateTime.now
-        sync_products(acc.id, ls)
+        sync_products(ls)
         acc.save!
 
-        stage('Synchroniznig fields')
-        sync_fields(acc.id)
+        stage("Synchroniznig fields #{acc.insales_subdomain}")
+        sync_fields
 
-        stage('Synchroniznig recent clients')
+        stage("Synchroniznig recent clients #{acc.insales_subdomain}")
         ls = acc.clients_last_sync
         acc.clients_last_sync = DateTime.now
-        sync_clients(acc.id, ls)
+        sync_clients(ls)
 
-        stage('Synchroniznig recent orders')
+        stage("Synchroniznig recent orders #{acc.insales_subdomain}")
         ls = acc.orders_last_sync
         acc.orders_last_sync = DateTime.now
-        sync_orders(acc.id, ls)
+        sync_orders(ls)
         acc.save!
       end
-
-      def sync_recent_orders
-        begin_sync
-        all_accounts do |acc|
-          stage("Synchroniznig account #{acc.insales_subdomain}")
-          stage('Synchroniznig fields')
-          sync_fields(acc.id)
-
-          stage('Synchroniznig orders')
-          ls = acc.orders_last_sync
-          acc.orders_last_sync = DateTime.now
-          sync_orders(acc.id, ls)
-          acc.save!
-        end
-        end_sync
-      end
-
-      def sync_all_orders
-        begin_sync
-        all_accounts do |acc|
-          stage("Synchroniznig account #{acc.insales_subdomain}")
-          stage('Synchroniznig fields')
-          sync_fields(acc.id)
-
-          stage('Synchroniznig orders')
-          acc.orders_last_sync = DateTime.now
-          sync_orders(acc.id)
-          acc.save!
-        end
-        end_sync
-      end
-
-      def sync_recent_products
-        begin_sync
-        all_accounts do |acc|
-          stage("Synchroniznig account #{acc.insales_subdomain}")
-          stage('Synchroniznig categories')
-          sync_categories(acc.id)
-          stage('Synchroniznig products')
-
-          acc.products_last_sync = DateTime.now
-          sync_products(acc.id)
-          acc.save!
-        end
-        end_sync
-      end
-
     end
   end
 end
