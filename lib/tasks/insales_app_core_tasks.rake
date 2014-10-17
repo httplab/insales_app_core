@@ -7,7 +7,7 @@ namespace :insales_sync do
     prevent_multiple_executions do
       observers = InsalesAppCore.config.sync_observers_classes
 
-      Parallel.each(Account.for_sync.all, in_threads: 4) do |a|
+      Parallel.each(Account.for_sync, in_threads: 4) do |a|
         ActiveRecord::Base.connection_pool.with_connection do
           a.configure_api
           syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new(a.id)
