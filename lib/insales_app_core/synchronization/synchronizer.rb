@@ -230,8 +230,14 @@ module InsalesAppCore
 
           local_field_id = @fields_map[remote_fields_value.field_id.to_i]
           next if local_field_id.nil?
+
+          # Если в value содержится экземпляр класса InsalesApi::Order::FieldsValue::Value,
+          # приводим его к строке
+          value = remote_fields_value.value
+          value = value.to_json unless value.is_a?(String)
+
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
-            account_id: account_id, owner_id: owner_id, field_id: local_field_id)
+            account_id: account_id, owner_id: owner_id, field_id: local_field_id, value: value)
           update_event(local_fields_value, remote_fields_value)
           local_fields_value.save!(:validate => false)
         end
