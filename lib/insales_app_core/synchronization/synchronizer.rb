@@ -158,8 +158,6 @@ module InsalesAppCore
       end
 
       def sync_orders(updated_since = nil)
-        remote_ids = []
-        puts updated_since
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           page_result.each do |remote_order|
             sync_one_order(remote_order)
@@ -175,6 +173,11 @@ module InsalesAppCore
         get_paged(InsalesApi::Order, 250, updated_since: updated_since, deleted: true) do |page_result|
           remote_ids += page_result.map(&:id)
         end
+
+        puts '-------------'
+        puts remote_ids
+        puts remote_ids.size
+
 
         if remote_ids.any?
           deleted = Order.where('account_id = ? AND insales_id IN (?)', account_id, remote_ids).delete_all
