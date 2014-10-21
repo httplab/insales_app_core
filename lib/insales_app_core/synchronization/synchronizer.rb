@@ -166,10 +166,10 @@ module InsalesAppCore
           end
         end
 
-        delete_remotely_deleted_orders(account_id, updated_since)
+        delete_remotely_deleted_orders(updated_since)
       end
 
-      def delete_remotely_deleted_orders(account_id, updated_since = nil)
+      def delete_remotely_deleted_orders(updated_since = nil)
         remote_ids = []
         puts updated_since
         get_paged(InsalesApi::Order, 250, updated_since: updated_since, deleted: true) do |page_result|
