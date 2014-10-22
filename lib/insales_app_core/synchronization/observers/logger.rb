@@ -69,8 +69,10 @@ module InsalesAppCore::Synchronization::Observers
         entity_str = entity.class.name
         entity_str += "#" + entity.id.to_s if entity.id.present?
       else
-        entity.to_s
+        entity_str = entity.to_s
       end
+
+      entity_str
     end
 
     def action_to_string(action)
