@@ -13,6 +13,7 @@ require 'insales_app_core/account_setting'
 require 'insales_app_core/account_setting/account_settings_collection'
 require 'insales_app_core/admin'
 require 'insales_app_core/admin/configuration'
+require 'just_one_lock'
 
 module InsalesAppCore
   mattr_accessor :config
