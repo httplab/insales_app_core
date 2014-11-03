@@ -1,7 +1,30 @@
 module InsalesAppCore
   module Synchronization
     module SyncMethods
+
+      def resync_all_products
+        begin_sync
+
+        acc = Account.find(account_id)
+
+        stage("Synchroniznig account #{acc.insales_subdomain}")
+
+        stage("Synchroniznig categories #{acc.insales_subdomain}")
+        sync_categories
+
+        stage("Synchroniznig properties #{acc.insales_subdomain}")
+        sync_properties
+
+        stage("Synchroniznig products #{acc.insales_subdomain}")
+        acc.products_last_sync = DateTime.now
+        sync_products
+        acc.save!
+
+        end_sync
+      end
+
       def sync_all
+        begin_sync
         acc = Account.find(account_id)
 
         stage("Synchroniznig account #{acc.insales_subdomain}")
@@ -11,6 +34,9 @@ module InsalesAppCore
 
         stage("Synchroniznig categories #{acc.insales_subdomain}")
         sync_categories
+
+        stage("Synchroniznig properties #{acc.insales_subdomain}")
+        sync_properties
 
         stage("Synchroniznig products #{acc.insales_subdomain}")
         acc.products_last_sync = DateTime.now
@@ -28,9 +54,11 @@ module InsalesAppCore
         acc.orders_last_sync = DateTime.now
         sync_orders
         acc.save!
+        end_sync
       end
 
       def sync_all_recent
+        begin_sync
         acc = Account.find(account_id)
         stage("Synchroniznig account #{acc.insales_subdomain}")
 
@@ -39,6 +67,9 @@ module InsalesAppCore
 
         stage("Synchroniznig categories #{acc.insales_subdomain}")
         sync_categories
+
+        stage("Synchroniznig properties #{acc.insales_subdomain}")
+        sync_properties
 
         stage("Synchroniznig recent products #{acc.insales_subdomain}")
         ls = acc.products_last_sync
@@ -59,6 +90,7 @@ module InsalesAppCore
         acc.orders_last_sync = DateTime.now
         sync_orders(ls)
         acc.save!
+        end_sync
       end
     end
   end

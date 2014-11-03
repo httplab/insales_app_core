@@ -10,6 +10,7 @@ class Product < ActiveRecord::Base
   has_many :collects, dependent: :destroy
   has_many :collections, through: :collects
   has_many :order_lines
+  has_many :characteristics
 
   maps_to_insales category_id: :insales_category_id
   scope :by_category_id, ->(category_id) { Category.find(category_id).nested_products.order(:category_id) }

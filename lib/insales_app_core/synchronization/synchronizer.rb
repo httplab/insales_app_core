@@ -58,6 +58,37 @@ module InsalesAppCore
         end
       end
 
+      def sync_properties
+        remote_ids = []
+        remote_properties = safe_api_call{InsalesApi::Property.all}
+        remote_properties.each do |remote_property|
+          begin
+            remote_ids << remote_property.id
+            local_property = Property.update_or_create_by_insales_entity(remote_property, account_id: account_id)
+            update_event(local_property, remote_property)
+            local_property.save!
+          rescue => ex
+            puts ex.message
+            puts ex.backtrace
+
+            if local_property
+              p local_property
+              p local_property.attributes
+            end
+
+            next
+          end
+        end
+
+        if remote_ids.any?
+          Property.where(account_id: account_id).where('properties.insales_id NOT IN (?)', remote_ids).each do |property|
+            changed
+            notify_observers(ENTITY_DELETED, property, nil, account_id)
+            property.delete
+          end
+        end
+      end
+
       def sync_products(updated_since = nil)
         remote_ids = []
         @category_map = Category.ids_map
@@ -74,6 +105,7 @@ module InsalesAppCore
               local_product.save!
               sync_variants(remote_product, local_product)
               sync_images(remote_product, local_product)
+              sync_characteristics(remote_product, local_product.id)
             rescue => ex
               puts ex.message
               if local_product
@@ -138,6 +170,39 @@ module InsalesAppCore
           deleted = Image.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
           changed
           notify_observers(ENTITY_DELETED, deleted, nil, account_id)
+        end
+      end
+
+      def sync_characteristics(remote_product, local_product_id)
+        @properties_map ||= Property.where(account_id: account_id).ids_map
+
+        remote_ids = []
+
+        remote_product.characteristics.each do |remote_characteristic|
+          begin
+            remote_ids << remote_characteristic.id
+
+            local_characteristic = Characteristic.update_or_create_by_insales_entity(remote_characteristic,
+              product_id: local_product_id,
+              insales_product_id: remote_product.id,
+              property_id: @properties_map[remote_characteristic.property_id],
+              account_id: account_id)
+            update_event(local_characteristic, remote_characteristic)
+            local_characteristic.save
+          rescue => ex
+            raise
+            puts ex.message
+            p remote_characteristic
+            p local_characteristic if local_characteristic
+            next
+          end
+        end
+
+        if remote_ids.any?
+          Characteristic.where('product_id = ? AND insales_id NOT IN (?)', local_product_id, remote_ids).each do |lc|
+            notify_observers(ENTITY_DELETED, lc, nil, account_id)
+            lc.delete
+          end
         end
       end
 
