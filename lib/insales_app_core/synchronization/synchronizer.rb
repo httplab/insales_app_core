@@ -105,7 +105,7 @@ module InsalesAppCore
               local_product.save!
               sync_variants(remote_product, local_product)
               sync_images(remote_product, local_product)
-              sync_characteristics(remote_product, local_product.id)
+              sync_characteristics(remote_product, local_product)
             rescue => ex
               puts ex.message
               if local_product
@@ -173,22 +173,21 @@ module InsalesAppCore
         end
       end
 
-      def sync_characteristics(remote_product, local_product_id)
+      def sync_characteristics(remote_product, local_product)
         @properties_map ||= Property.where(account_id: account_id).ids_map
 
-        remote_ids = []
+        product_characteristics_ids = []
 
         remote_product.characteristics.each do |remote_characteristic|
           begin
-            remote_ids << remote_characteristic.id
+            product_characteristics_ids << remote_characteristic.id
 
             local_characteristic = Characteristic.update_or_create_by_insales_entity(remote_characteristic,
-              product_id: local_product_id,
-              insales_product_id: remote_product.id,
               property_id: @properties_map[remote_characteristic.property_id],
               account_id: account_id)
             update_event(local_characteristic, remote_characteristic)
             local_characteristic.save
+            product_characteristics_ids << local_characteristic.id
           rescue => ex
             raise
             puts ex.message
@@ -198,12 +197,7 @@ module InsalesAppCore
           end
         end
 
-        if remote_ids.any?
-          Characteristic.where('product_id = ? AND insales_id NOT IN (?)', local_product_id, remote_ids).each do |lc|
-            notify_observers(ENTITY_DELETED, lc, nil, account_id)
-            lc.delete
-          end
-        end
+        local_product.set_characteristics(product_characteristics_ids)
       end
 
       def sync_fields
