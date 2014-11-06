@@ -38,7 +38,7 @@ module InsalesAppCore
         remote_categories.each do |remote_category|
           local_category = Category.update_or_create_by_insales_entity(remote_category, account_id: account_id)
           update_event(local_category, remote_category)
-          local_category.save!
+          local_category.save!(validate: false)
         end
 
         local_categories = Category.where(account_id: account_id)
@@ -54,7 +54,7 @@ module InsalesAppCore
           end
 
           local_category.parent_id = tree_map[local_category.insales_parent_id]
-          local_category.save!
+          local_category.save!(validate: false)
         end
       end
 
@@ -66,7 +66,7 @@ module InsalesAppCore
             remote_ids << remote_property.id
             local_property = Property.update_or_create_by_insales_entity(remote_property, account_id: account_id)
             update_event(local_property, remote_property)
-            local_property.save!
+            local_property.save!(validate: false)
           rescue => ex
             puts ex.message
             puts ex.backtrace
@@ -75,8 +75,6 @@ module InsalesAppCore
               p local_property
               p local_property.attributes
             end
-
-            next
           end
         end
 
@@ -102,7 +100,7 @@ module InsalesAppCore
             begin
               local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
               update_event(local_product, remote_product)
-              local_product.save!
+              local_product.save!(validate: false)
               sync_variants(remote_product, local_product)
               sync_images(remote_product, local_product)
               sync_characteristics(remote_product, local_product)
@@ -112,7 +110,6 @@ module InsalesAppCore
                 p local_product
                 p local_product.attributes
               end
-              next
             end
           end
         end
@@ -139,11 +136,10 @@ module InsalesAppCore
             local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, product_id: local_product.id)
             local_variant.insales_product_id ||= remote_product.id
             update_event(local_variant, remote_variant)
-            local_variant.save!
+            local_variant.save!(validate: false)
           rescue => ex
             puts ex.message
             puts remote_variant.inspect
-            next
           end
         end
       end
@@ -156,11 +152,10 @@ module InsalesAppCore
             local_image = Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, product_id: local_product.id)
             local_image.insales_product_id ||= insales_product.id
             update_event(local_image, remote_image)
-            local_image.save!
+            local_image.save!(validate: false)
           rescue => ex
             puts ex.message
             puts remote_image.inspect
-            next
           end
         end
 
@@ -180,24 +175,20 @@ module InsalesAppCore
 
         remote_product.characteristics.each do |remote_characteristic|
           begin
-            product_characteristics_ids << remote_characteristic.id
-
             local_characteristic = Characteristic.update_or_create_by_insales_entity(remote_characteristic,
               property_id: @properties_map[remote_characteristic.property_id],
               account_id: account_id)
             update_event(local_characteristic, remote_characteristic)
-            local_characteristic.save
+            local_characteristic.save!(validate: false)
             product_characteristics_ids << local_characteristic.id
           rescue => ex
-            raise
             puts ex.message
             p remote_characteristic
             p local_characteristic if local_characteristic
-            next
           end
         end
 
-        local_product.set_characteristics(product_characteristics_ids)
+        local_product.characteristic_ids = product_characteristics_ids
       end
 
       def sync_fields
@@ -206,7 +197,7 @@ module InsalesAppCore
         remote_fields.each do |remote_field|
           local_field = Field.update_or_create_by_insales_entity(remote_field, account_id: account_id)
           update_event(local_field, remote_field)
-          local_field.save!
+          local_field.save!(validate: false)
         end
 
         if remote_ids.any?
@@ -268,7 +259,7 @@ module InsalesAppCore
         end
 
         update_event(local_order, remote_order)
-        local_order.save!(:validate => false)
+        local_order.save!(validate: false)
 
         sync_fields_values(remote_order.fields_values, local_order.id)
         sync_order_lines(remote_order.order_lines, local_order.id, remote_order.id)
@@ -301,7 +292,7 @@ module InsalesAppCore
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
             account_id: account_id, owner_id: owner_id, field_id: local_field_id, value: value)
           update_event(local_fields_value, remote_fields_value)
-          local_fields_value.save!(:validate => false)
+          local_fields_value.save!(validate: false)
         end
 
         if remote_ids.any?
@@ -378,7 +369,7 @@ module InsalesAppCore
         remote_collections.each do |remote_collection|
           local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
           update_event(local_collection)
-          local_collection.save!
+          local_collection.save!(validate: false)
         end
 
         local_collections = Collection.where(account_id: account_id)
@@ -395,7 +386,7 @@ module InsalesAppCore
 
           local_collection.parent_id = tree_map[local_collection.insales_parent_id]
           begin
-            local_collection.save!
+            local_collection.save!(validate: false)
           rescue
             puts local_collection
             p local_collection

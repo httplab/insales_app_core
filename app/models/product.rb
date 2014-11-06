@@ -16,14 +16,14 @@ class Product < ActiveRecord::Base
   maps_to_insales category_id: :insales_category_id
   scope :by_category_id, ->(category_id) { Category.find(category_id).nested_products.order(:category_id) }
 
-  def set_characteristics(ids)
-    self.product_characteristics.where('product_characteristics.characteristic_id NOT IN (?)', ids).delete_all
-    local_ids = self.product_characteristics.map(&:characteristic_id)
-    ids_to_add = ids - local_ids
+  # def set_characteristics(ids)
+  #   self.product_characteristics.where('product_characteristics.characteristic_id NOT IN (?)', ids).delete_all
+  #   local_ids = self.product_characteristics.map(&:characteristic_id)
+  #   ids_to_add = ids - local_ids
 
-    ids_to_add.each do |id_to_add|
-      self.product_characteristics.create(characteristic_id: id_to_add)
-    end
-  end
+  #   ids_to_add.each do |id_to_add|
+  #     self.product_characteristics.create(characteristic_id: id_to_add)
+  #   end
+  # end
 
 end
