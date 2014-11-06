@@ -35,4 +35,18 @@ namespace :insales_sync do
       end
     end
   end
+
+  desc 'Re-sync all products for given account'
+  task :account_products, [:account_id] => :environment do |t, args|
+    prevent_multiple_executions do
+      puts args
+      a = Account.find(args[:account_id].to_i)
+      observers = InsalesAppCore.config.sync_observers_classes
+      a.configure_api
+      syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new(a.id)
+      syncronizer.add_observer(InsalesAppCore::Synchronization::Observers::Logger.new(true))
+      observers.each { |clazz| syncronizer.add_observer(clazz.new) }
+      syncronizer.resync_all_products
+    end
+  end
 end
