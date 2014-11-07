@@ -4,10 +4,10 @@ class Order < ActiveRecord::Base
     presence: true
 
   belongs_to :account
-  belongs_to :client
-  has_many :fields_values ,-> {joins(:field).where('fields.destiny = 3') }, class_name: FieldsValue, foreign_key: :owner_id, dependent: :destroy
-  has_many :order_lines, dependent: :destroy
-  has_one :shipping_address, class_name: 'Order::ShippingAddress', dependent: :destroy
+  belongs_to :client, foreign_key: :insales_client_id, primary_key: :insales_id
+  has_many :fields_values ,-> {joins(:field).where('fields.destiny = 3') }, class_name: FieldsValue, foreign_key: :insales_owner_id, dependent: :destroy, primary_key: :insales_id
+  has_many :order_lines, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_order_id
+  has_one :shipping_address, class_name: 'Order::ShippingAddress', dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_order_id
 
   maps_to_insales :delivery_variant_id => :insales_delivery_variant_id,
                   :payment_gateway_id => :insales_payment_gateway_id,

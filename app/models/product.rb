@@ -3,14 +3,17 @@ class Product < ActiveRecord::Base
   # Рельса неважно валидирует булевские значения
   # false.blank? == true
   validates :available, :is_hidden, inclusion: [true, false]
-  belongs_to :category
+  belongs_to :category, primary_key: :insales_id, foreign_key: :insales_category_id
+
   belongs_to :account
-  has_many :variants, dependent: :destroy
-  has_many :images, dependent: :destroy
-  has_many :collects, dependent: :destroy
+
+
+  has_many :variants, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_product_id
+  has_many :images, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_product_id
+  has_many :collects, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_product_id
   has_many :collections, through: :collects
-  has_many :order_lines
-  has_many :product_characteristics
+  has_many :order_lines, primary_key: :insales_id, foreign_key: :insales_product_id
+  has_many :product_characteristics, primary_key: :insales_id, foreign_key: :insales_product_id
   has_many :characteristics, through: :product_characteristics
 
   maps_to_insales category_id: :insales_category_id

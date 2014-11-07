@@ -2,8 +2,8 @@ class Category < ActiveRecord::Base
   validates :account_id, :insales_id, :title, presence: true
   has_many :products
   belongs_to :account
-  belongs_to :parent, class_name: 'Category', foreign_key: :parent_id
-  has_many :children, class_name: 'Category', foreign_key: :parent_id
+  belongs_to :parent, class_name: 'Category', foreign_key: :insales_parent_id, primary_key: :insales_id
+  has_many :children, class_name: 'Category', foreign_key: :insales_parent_id, primary_key: :insales_id
 
   maps_to_insales parent_id: :insales_parent_id
 
