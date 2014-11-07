@@ -5,6 +5,24 @@ InsalesAppCore.setup do |config|
   config.insales_api_host = ENV['INSALES_API_HOST']
   config.insales_api_autologin_path = ENV['INSALES_API_AUTOLOGIN_PATH']
 
+  # Включение синхронизации отдельных сущностей
+  config.sync_options = {
+    categories: true,
+    collections: true,
+    collects: true,
+    products: true,
+    images: true,
+    variants: true,
+    fields: true,
+    fields_values: true,
+    properties: true,
+    characteristics: true,
+    orders: true,
+    order_lines: true,
+    shipping_addresses: true,
+    clients: true
+  }
+
   # Добавить в виде строк имена обзерверов для синхронизации.
   # config.sync_observers = ['AppNamespace::OrdersObserver']
 
