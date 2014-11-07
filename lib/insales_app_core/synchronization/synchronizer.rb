@@ -35,6 +35,7 @@ module InsalesAppCore
 
       def initialize(account_id, options = {})
         super(account_id)
+        @account = Account.find(account_id)
         normalize_sync_options(options[:sync])
       end
 
@@ -64,7 +65,6 @@ module InsalesAppCore
 
         local_categories = Category.where(account_id: account_id)
         remote_categories_ids = remote_categories.map(&:id)
-        tree_map = Category.ids_map
 
         local_categories.each do |local_category|
           if !remote_categories_ids.include?(local_category.insales_id)
@@ -73,9 +73,6 @@ module InsalesAppCore
             local_category.delete
             next
           end
-
-          local_category.parent_id = tree_map[local_category.insales_parent_id]
-          local_category.save!(validate: false)
         end
       end
 
@@ -110,21 +107,19 @@ module InsalesAppCore
 
       def sync_products(updated_since = nil)
         remote_ids = []
-        @category_map = Category.ids_map
 
         get_paged(InsalesApi::Product, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
-
           page_result.each do |remote_product|
-            category_id = @category_map[remote_product.category_id]
+
             next if category_id.nil?
             begin
-              local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
+              local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id)
               update_event(local_product, remote_product)
               local_product.save!(validate: false)
-              sync_variants(remote_product, local_product) if @sync_options[:variants]
-              sync_images(remote_product, local_product) if @sync_options[:images]
-              sync_characteristics(remote_product, local_product) if @sync_options[:characteristics]
+              sync_variants(remote_product) if @sync_options[:variants]
+              sync_images(remote_product) if @sync_options[:images]
+              sync_characteristics(remote_product) if @sync_options[:characteristics]
             rescue => ex
               puts ex.message
               if local_product
@@ -142,20 +137,19 @@ module InsalesAppCore
         end
       end
 
-      def sync_variants(remote_product, local_product)
+      def sync_variants(remote_product)
         remote_variants = remote_product.variants
         remote_ids = remote_variants.map(&:id)
 
         if remote_ids.any?
-          deleted = Variant.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
+          deleted = Variant.where('account_id = ? AND insales_product_id = ? AND insales_id NOT IN (?)', account_id, remote_product.id, remote_ids).delete_all
           changed
           notify_observers(ENTITY_DELETED, deleted, nil, account_id)
         end
 
         remote_variants.each do |remote_variant|
           begin
-            local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, product_id: local_product.id)
-            local_variant.insales_product_id ||= remote_product.id
+            local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, insales_product_id: remote_product.id)
             update_event(local_variant, remote_variant)
             local_variant.save!(validate: false)
           rescue => ex
@@ -165,13 +159,12 @@ module InsalesAppCore
         end
       end
 
-      def sync_images(insales_product, local_product)
+      def sync_images(insales_product)
         remote_images = insales_product.images
 
         remote_images.each do |remote_image|
           begin
-            local_image = Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, product_id: local_product.id)
-            local_image.insales_product_id ||= insales_product.id
+            local_image = Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, insales_product_id: insales_product.id)
             update_event(local_image, remote_image)
             local_image.save!(validate: false)
           rescue => ex
@@ -183,25 +176,21 @@ module InsalesAppCore
         remote_ids = remote_images.map(&:id)
 
         if remote_ids.any?
-          deleted = Image.where('account_id = ? AND product_id = ? AND insales_id NOT IN (?)', account_id, local_product.id, remote_ids).delete_all
+          deleted = Image.where('account_id = ? AND insales_product_id = ? AND insales_id NOT IN (?)', account_id, remote_product.id, remote_ids).delete_all
           changed
           notify_observers(ENTITY_DELETED, deleted, nil, account_id)
         end
       end
 
-      def sync_characteristics(remote_product, local_product)
-        @properties_map ||= Property.where(account_id: account_id).ids_map
-
+      def sync_characteristics(remote_product)
         product_characteristics_ids = []
 
         remote_product.characteristics.each do |remote_characteristic|
           begin
-            local_characteristic = Characteristic.update_or_create_by_insales_entity(remote_characteristic,
-              property_id: @properties_map[remote_characteristic.property_id],
-              account_id: account_id)
+            local_characteristic = Characteristic.update_or_create_by_insales_entity(remote_characteristic, account_id: account_id)
             update_event(local_characteristic, remote_characteristic)
             local_characteristic.save!(validate: false)
-            product_characteristics_ids << local_characteristic.id
+            product_characteristics_ids << remote_characteristic.id
           rescue => ex
             puts ex.message
             p remote_characteristic
@@ -258,22 +247,7 @@ module InsalesAppCore
       end
 
       def sync_one_order(remote_order)
-        insales_client_id = remote_order.client.id
-        # Если случилось так, что клиента нет в БД (это может произойти если заказ был создан после того,
-        # как мы синхронизировали клиенты, но еще не начали синхронизировать заказы).
-        client = Client.find_by(insales_id: insales_client_id) || sync_one_client(insales_client_id)
-
-        # Если клиента никак не удалось получить, кидаем исключение.
-        unless client
-          fail "sync_one_order: Client with insales_client_id=#{insales_client_id} not found in database"
-        end
-
-        hsh = {
-          account_id: account_id,
-          client_id: client.id,
-          insales_client_id: insales_client_id
-        }
-        local_order = Order.update_or_create_by_insales_entity(remote_order, hsh)
+        local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id,)
 
         if remote_order.cookies.present?
           local_order.cookies = remote_order.cookies.attributes
@@ -282,9 +256,9 @@ module InsalesAppCore
         update_event(local_order, remote_order)
         local_order.save!(validate: false)
 
-        sync_fields_values(remote_order.fields_values, local_order.id) if @sync_options[:fields_values]
-        sync_order_lines(remote_order.order_lines, local_order.id, remote_order.id) if @sync_options[:order_lines]
-        sync_order_shipping_address(remote_order.shipping_address, local_order.id)
+        sync_fields_values(remote_order.fields_values, remote_order.id) if @sync_options[:fields_values]
+        sync_order_lines(remote_order.order_lines, remote_order.id) if @sync_options[:order_lines]
+        sync_order_shipping_address(remote_order.shipping_address, remote_order.id)
         true
       rescue => ex
         puts ex.message
@@ -296,22 +270,16 @@ module InsalesAppCore
         false
       end
 
-      def sync_fields_values(remote_fields_values, owner_id)
+      def sync_fields_values(remote_fields_values, insales_owner_id)
         remote_ids = remote_fields_values.map(&:id)
-        @fields_map ||= Field.ids_map
-
         remote_fields_values.each do |remote_fields_value|
-
-          local_field_id = @fields_map[remote_fields_value.field_id.to_i]
-          next if local_field_id.nil?
-
           # Если в value содержится экземпляр класса InsalesApi::Order::FieldsValue::Value,
           # приводим его к строке
           value = remote_fields_value.value
           value = value.to_json unless value.is_a?(String)
 
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
-            account_id: account_id, owner_id: owner_id, field_id: local_field_id, value: value)
+            account_id: account_id, value: value, insales_owner_id: insales_owner_id)
           update_event(local_fields_value, remote_fields_value)
           local_fields_value.save!(validate: false)
         end
@@ -323,18 +291,12 @@ module InsalesAppCore
         end
       end
 
-      def sync_order_lines(remote_order_lines, order_id, insales_order_id)
+      def sync_order_lines(remote_order_lines, insales_order_id)
         remote_ids = remote_order_lines.map(&:id)
-        @products_map ||= Product.ids_map
-        @variants_map ||= Variant.ids_map
 
         remote_order_lines.each do |remote_order_line|
-          local_product_id = @products_map[remote_order_line.product_id.to_i]
-          local_variant_id = @variants_map[remote_order_line.variant_id.to_i]
-          next if local_product_id.nil? || local_variant_id.nil?
           local_order_line = OrderLine.update_or_create_by_insales_entity(remote_order_line,
-            account_id: account_id, order_id: order_id, product_id: local_product_id,
-            variant_id: local_variant_id, insales_order_id: insales_order_id)
+            account_id: account_id, insales_order_id: insales_order_id)
           update_event(local_order_line, remote_order_line)
           local_order_line.save!(validate: false)
         end
@@ -346,8 +308,8 @@ module InsalesAppCore
         end
       end
 
-      def sync_order_shipping_address(remote_shipping_address, order_id)
-        sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, order_id: order_id)
+      def sync_order_shipping_address(remote_shipping_address, insales_order_id)
+        sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, insales_order_id: order_id)
         sa.save!(validate: false)
       end
 
@@ -395,7 +357,6 @@ module InsalesAppCore
 
         local_collections = Collection.where(account_id: account_id)
         remote_collections_ids = Set.new(remote_collections.map(&:id))
-        tree_map = Collection.ids_map
 
         local_collections.each do |local_collection|
           if !remote_collections_ids.include?(local_collection.insales_id)
@@ -404,31 +365,19 @@ module InsalesAppCore
             local_collection.delete
             next
           end
-
-          local_collection.parent_id = tree_map[local_collection.insales_parent_id]
-          begin
-            local_collection.save!(validate: false)
-          rescue
-            puts local_collection
-            p local_collection
-          end
         end
       end
 
       def sync_collects
         remote_pairs = []
-        collection_map = Collection.ids_map
-        product_map = Product.ids_map
 
         get_paged(InsalesApi::Collect, 1000) do |page_result|
           page_result.each do |c|
-            c_id = collection_map[c.collection_id]
-            p_id = product_map[c.product_id]
-            remote_pairs << [c_id, p_id] if c_id && p_id
+            remote_pairs << [c.collection_id, c.product_id]
           end
         end
 
-        local_pairs = Collect.where('account_id = ?', account_id).pluck(:collection_id, :product_id)
+        local_pairs = Collect.where('account_id = ?', account_id).pluck(:insales_collection_id, :insales_product_id)
 
         pairs_to_delete = local_pairs - remote_pairs
         pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]},#{p[1]})"}.join(',')
