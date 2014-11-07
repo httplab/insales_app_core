@@ -17,6 +17,27 @@ module InsalesAppCore
       REQUEST = 7
       BEGIN_SYNC = 8
 
+      DEFAULT_SYNC_OPTIONS = {
+        categories: true,
+        collections: true,
+        collects: true,
+        products: true,
+        images: true,
+        variants: true,
+        fields: true,
+        fields_values: true,
+        properties: true,
+        characteristics: true,
+        orders: true,
+        order_lines: true,
+        clients: true
+      }
+
+      def initialize(account_id, options = {})
+        super(account_id)
+        normalize_sync_options(options[:sync])
+      end
+
       def safe_api_call(&block)
         begin
           request(nil)
@@ -101,9 +122,9 @@ module InsalesAppCore
               local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id, category_id: category_id)
               update_event(local_product, remote_product)
               local_product.save!(validate: false)
-              sync_variants(remote_product, local_product)
-              sync_images(remote_product, local_product)
-              sync_characteristics(remote_product, local_product)
+              sync_variants(remote_product, local_product) if @sync_options[:variants]
+              sync_images(remote_product, local_product) if @sync_options[:images]
+              sync_characteristics(remote_product, local_product) if @sync_options[:characteristics]
             rescue => ex
               puts ex.message
               if local_product
@@ -261,8 +282,8 @@ module InsalesAppCore
         update_event(local_order, remote_order)
         local_order.save!(validate: false)
 
-        sync_fields_values(remote_order.fields_values, local_order.id)
-        sync_order_lines(remote_order.order_lines, local_order.id, remote_order.id)
+        sync_fields_values(remote_order.fields_values, local_order.id) if @sync_options[:fields_values]
+        sync_order_lines(remote_order.order_lines, local_order.id, remote_order.id) if @sync_options[:order_lines]
         sync_order_shipping_address(remote_order.shipping_address, local_order.id)
         true
       rescue => ex
@@ -472,6 +493,12 @@ module InsalesAppCore
       def begin_sync
         changed
         notify_observers(BEGIN_SYNC, account_id)
+      end
+
+      def normalize_sync_options(sync_options)
+        @sync_options = DEFAULT_SYNC_OPTIONS.merge(sync_options || {})
+        @sync_options[:fields] = @sync_options[:fields] || @sync_options[:fields_values]
+        @sync_options
       end
     end
   end
