@@ -3,7 +3,8 @@ module InsalesAppCore
     attr_accessor :insales_api_key,
                   :insales_api_secret,
                   :insales_api_host,
-                  :insales_api_autologin_path
+                  :insales_api_autologin_path,
+                  :sync_options
 
 
     attr_accessor :sync_observers
