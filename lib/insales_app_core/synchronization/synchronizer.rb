@@ -112,7 +112,7 @@ module InsalesAppCore
 
       def sync_products(updated_since = nil)
         return if !@sync_options[:products]
-        stage("Synchroniznig products #{@account.insales_subdomain}")
+        report_stage('products', updated_since)
 
         @characteristics_cache = nil
         remote_ids = []
@@ -244,7 +244,7 @@ module InsalesAppCore
 
       def sync_orders(updated_since = nil)
         return if !@sync_options[:orders]
-        stage("Synchroniznig orders #{@account.insales_subdomain}")
+        report_stage('orders', updated_since)
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           page_result.each do |remote_order|
             sync_one_order(remote_order)
@@ -354,7 +354,7 @@ module InsalesAppCore
 
       def sync_clients(updated_since = nil)
         return if !@sync_options[:clients]
-        stage("Synchroniznig clients #{@account.insales_subdomain}")
+        report_stage('clients', updated_since)
         remote_ids = []
         puts updated_since
         get_paged(InsalesApi::Client, 250, updated_since: updated_since) do |page_result|
@@ -496,6 +496,14 @@ module InsalesAppCore
         @sync_options = DEFAULT_SYNC_OPTIONS.merge(sync_options || {})
         @sync_options[:fields] = @sync_options[:fields] || @sync_options[:fields_values]
         @sync_options
+      end
+
+      def report_stage(entity, updated_since = nil)
+        if updated_since.present?
+          stage("Synchroniznig #{entity} for #{@account.insales_subdomain} (since #{updated_since})")
+        else
+          stage("Synchroniznig #{entity} for #{@account.insales_subdomain}")
+        end
       end
     end
   end
