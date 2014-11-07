@@ -428,12 +428,13 @@ module InsalesAppCore
 
         pairs_to_delete = local_pairs - remote_pairs
         pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]},#{p[1]})"}.join(',')
-        Collect.where('(collection_id, product_id) IN (?)', pairs_to_delete).delete_all if pairs_to_delete.present?
+        Collect.where('(insales_collection_id, insales_product_id) IN (?)', pairs_to_delete).delete_all if pairs_to_delete.present?
 
         pairs_to_create = remote_pairs - local_pairs
         values_clause = pairs_to_create.map {|v| "(#{v[0]},#{v[1]},#{account_id})"}.join(',')
+
         if pairs_to_create.any?
-          Collect.connection.execute("INSERT INTO collects (collection_id, product_id, account_id) VALUES #{values_clause}")
+          Collect.connection.execute("INSERT INTO collects (insales_collection_id, insales_product_id, account_id) VALUES #{values_clause}")
         end
       end
 
