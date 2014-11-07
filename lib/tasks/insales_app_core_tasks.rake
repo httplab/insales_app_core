@@ -13,7 +13,7 @@ namespace :insales_sync do
           syncronizer = ::InsalesAppCore::Synchronization::Synchronizer.new(a.id, sync: InsalesAppCore.config.sync_options)
           syncronizer.add_observer(InsalesAppCore::Synchronization::Observers::Logger.new(true))
           observers.each { |clazz| syncronizer.add_observer(clazz.new) }
-          syncronizer.sync(true)
+          syncronizer.sync(recent: true)
         end
       end
     end

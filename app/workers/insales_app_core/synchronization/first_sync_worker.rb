@@ -11,7 +11,7 @@ module InsalesAppCore::Synchronization
       observers = InsalesAppCore.config.sync_observers_classes
       syncronizer.add_observer(InsalesAppCore::Synchronization::Observers::Logger.new)
       observers.each { |clazz| syncronizer.add_observer(clazz.new) }
-      syncronizer.sync(false)
+      syncronizer.sync(recent: false)
     end
   end
 end

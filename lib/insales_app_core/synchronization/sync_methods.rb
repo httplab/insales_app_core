@@ -1,7 +1,7 @@
 module InsalesAppCore
   module Synchronization
     module SyncMethods
-      def sync(recent = true)
+      def sync(recent: true)
         begin_sync
         stage("Synchroniznig account #{@account.insales_subdomain}")
         sync_collections
