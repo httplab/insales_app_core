@@ -112,6 +112,8 @@ module InsalesAppCore
 
       def sync_products(updated_since = nil)
         return if !@sync_options[:products]
+        @account.products_last_sync = DateTime.now
+
         report_stage('products', updated_since)
 
         @characteristics_cache = nil
@@ -142,6 +144,8 @@ module InsalesAppCore
           changed
           notify_observers(ENTITY_DELETED, deleted, nil, account_id)
         end
+
+        @account.save!
       end
 
       def sync_variants(remote_product)
@@ -244,6 +248,7 @@ module InsalesAppCore
 
       def sync_orders(updated_since = nil)
         return if !@sync_options[:orders]
+        @account.orders_last_sync = DateTime.now
         report_stage('orders', updated_since)
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
           page_result.each do |remote_order|
@@ -252,6 +257,7 @@ module InsalesAppCore
         end
 
         delete_remotely_deleted_orders(updated_since)
+        @account.save!
       end
 
       def delete_remotely_deleted_orders(updated_since = nil)
@@ -354,6 +360,7 @@ module InsalesAppCore
 
       def sync_clients(updated_since = nil)
         return if !@sync_options[:clients]
+        @account.clients_last_sync = DateTime.now
         report_stage('clients', updated_since)
         remote_ids = []
         puts updated_since
@@ -371,6 +378,8 @@ module InsalesAppCore
             notify_observers(ENTITY_DELETED, deleted, account_id)
           end
         end
+
+        @account.save!
       end
 
       def sync_one_client(remote_client)
