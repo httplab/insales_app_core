@@ -16,6 +16,7 @@ module InsalesAppCore
       END_SYNC = 6
       REQUEST = 7
       BEGIN_SYNC = 8
+      ERROR = 9
 
       DEFAULT_SYNC_OPTIONS = {
         categories: true,

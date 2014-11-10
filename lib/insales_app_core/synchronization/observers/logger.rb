@@ -11,7 +11,8 @@ module InsalesAppCore::Synchronization::Observers
       ::InsalesAppCore::Synchronization::Synchronizer::STAGE => 'STAGE',
       ::InsalesAppCore::Synchronization::Synchronizer::END_SYNC => 'END SYNC',
       ::InsalesAppCore::Synchronization::Synchronizer::REQUEST => 'REQUEST',
-      ::InsalesAppCore::Synchronization::Synchronizer::BEGIN_SYNC => 'BEGIN SYNC'
+      ::InsalesAppCore::Synchronization::Synchronizer::BEGIN_SYNC => 'BEGIN SYNC',
+      ::InsalesAppCore::Synchronization::Synchronizer::ERROR => 'ERROR'
     }
 
     ACTION_COLORS = {
@@ -19,7 +20,8 @@ module InsalesAppCore::Synchronization::Observers
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED => 'yellow',
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_DELETED => 'red',
       ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR => 'red',
-      ::InsalesAppCore::Synchronization::Synchronizer::REQUEST => 'blue'
+      ::InsalesAppCore::Synchronization::Synchronizer::REQUEST => 'blue',
+      ::InsalesAppCore::Synchronization::Synchronizer::ERROR => 'red'
     }
 
     def update(type, *args)
