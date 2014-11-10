@@ -24,7 +24,7 @@ module InsalesAppCore
 
           end_sync
         rescue => ex
-          updated
+          changed
           notify_observers(ERROR, ex, account_id)
         end
       end
