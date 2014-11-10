@@ -25,7 +25,7 @@ module InsalesAppCore
           end_sync
         rescue => ex
           changed
-          notify_observers(ERROR, ex, account_id)
+          notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
         end
       end
     end
