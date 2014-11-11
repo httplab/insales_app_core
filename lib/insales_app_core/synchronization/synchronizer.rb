@@ -42,18 +42,12 @@ module InsalesAppCore
       end
 
       def safe_api_call(&block)
-        begin
-          request(nil)
-          yield
-        rescue ActiveResource::ServerError => ex
-          raise ex if "503" != ex.response.code.to_s
-          retry_after = ex.response['Retry-After']
-          retry_after = retry_after.present? ? retry_after.to_i : 150
+        callback = Proc.new do |wait_for|
           changed
-          notify_observers(WILL_WAIT_FOR, retry_after, account_id)
-          sleep(retry_after)
-          retry
+          notify_observers(WILL_WAIT_FOR, wait_for, account_id)
         end
+
+        InsalesApi.wait_retry(nil, callback, &block)
       end
 
       def sync_categories
