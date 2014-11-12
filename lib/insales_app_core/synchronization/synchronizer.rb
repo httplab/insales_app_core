@@ -47,7 +47,13 @@ module InsalesAppCore
           notify_observers(WILL_WAIT_FOR, wait_for, account_id)
         end
 
-        InsalesApi.wait_retry(nil, callback, &block)
+        begin
+          InsalesApi.wait_retry(nil, callback, &block)
+        rescue Zlib::BufError => ex
+          changed
+          notify_observers(ERROR, ex, account_id)
+          retry
+        end
       end
 
       def sync_categories
