@@ -349,7 +349,8 @@ module InsalesAppCore
 
       def sync_order_shipping_address(remote_shipping_address, insales_order_id)
         return if !@sync_options[:shipping_addresses]
-        sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address, account_id: account_id, insales_order_id: order_id)
+        sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address,
+          account_id: account_id, insales_order_id: insales_order_id)
         sa.save!(validate: false)
       end
 
