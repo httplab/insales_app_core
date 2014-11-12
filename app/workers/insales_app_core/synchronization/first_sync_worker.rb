@@ -9,9 +9,9 @@ module InsalesAppCore::Synchronization
       account.configure_api
       synchronizer = Synchronizer.new(account_id, InsalesAppCore.config.sync_options)
       observers = InsalesAppCore.config.sync_observers_classes
-      syncronizer.add_observer(InsalesAppCore::Synchronization::Observers::Logger.new)
-      observers.each { |clazz| syncronizer.add_observer(clazz.new) }
-      syncronizer.sync(recent: false)
+      synchronizer.add_observer(InsalesAppCore::Synchronization::Observers::Logger.new)
+      observers.each { |clazz| synchronizer.add_observer(clazz.new) }
+      synchronizer.sync(recent: false)
     end
   end
 end
