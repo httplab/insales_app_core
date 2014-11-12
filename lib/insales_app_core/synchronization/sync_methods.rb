@@ -26,7 +26,7 @@ module InsalesAppCore
         rescue => ex
           changed
           notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
-          ::Rollbar.report_exception(ex, "Ошибка при синхронизации аккаунта #{account_id}")
+          ::Rollbar.report_exception(ex)
         end
       end
     end
