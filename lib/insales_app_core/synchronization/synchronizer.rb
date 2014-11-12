@@ -268,11 +268,6 @@ module InsalesAppCore
           remote_ids += page_result.map(&:id)
         end
 
-        puts '-------------'
-        puts remote_ids
-        puts remote_ids.size
-
-
         if remote_ids.any?
           deleted = Order.where('account_id = ? AND insales_id IN (?)', account_id, remote_ids).delete_all
           if deleted > 0
