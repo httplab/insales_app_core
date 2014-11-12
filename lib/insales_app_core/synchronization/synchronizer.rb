@@ -316,8 +316,8 @@ module InsalesAppCore
         end
 
         if remote_ids.any?
-          deleted = FieldsValue.where('account_id = ? AND owner_id = ? AND insales_id NOT IN (?)',
-           account_id, owner_id, remote_ids).delete_all
+          deleted = FieldsValue.where('account_id = ? AND insales_owner_id = ? AND insales_id NOT IN (?)',
+           account_id, insales_owner_id, remote_ids).delete_all
 
           if deleted > 0
             changed
