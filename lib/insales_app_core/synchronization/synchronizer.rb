@@ -280,7 +280,7 @@ module InsalesAppCore
       def sync_one_order(remote_order)
         local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id, insales_client_id: remote_order.client.id)
 
-        if sync_options[:clients]
+        if @sync_options[:clients]
           client = Client.find_by(insales_id: local_order.insales_client_id) || sync_one_client(local_order.insales_client_id)
 
           unless client
