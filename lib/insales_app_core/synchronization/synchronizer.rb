@@ -278,7 +278,15 @@ module InsalesAppCore
       end
 
       def sync_one_order(remote_order)
-        local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id,)
+        local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id, insales_client_id: remote_order.client.id)
+
+        if sync_options[:clients]
+          client = Client.find_by(insales_id: local_order.insales_client_id) || sync_one_client(local_order.insales_client_id)
+
+          unless client
+            fail "sync_one_order: Client with insales_client_id=#{local_order.insales_client_id} not found in database"
+          end
+        end
 
         if remote_order.cookies.present?
           local_order.cookies = remote_order.cookies.attributes
@@ -381,7 +389,7 @@ module InsalesAppCore
 
       def sync_one_client(remote_client)
         unless remote_client.is_a? InsalesApi::Client
-          remote_client = InsalesApi::Client.find remote_client
+          remote_client = InsalesApi::Client.find(remote_client)
         end
 
         local_client = Client.update_or_create_by_insales_entity(remote_client, account_id: account_id)

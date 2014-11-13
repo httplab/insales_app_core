@@ -1,6 +1,7 @@
 class Order < ActiveRecord::Base
   validates :account_id, :insales_id, :insales_delivery_variant_id,
    :number, :insales_payment_gateway_id, :items_price, :total_price, :full_delivery_price,
+   :insales_client_id,
     presence: true
 
   belongs_to :account
