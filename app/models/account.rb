@@ -35,10 +35,17 @@ class Account < ActiveRecord::Base
     password = InsalesApi::App.password_by_token(params[:token])
     insales_id = params[:insales_id]
 
-    Account.create! do |a|
-      a.insales_subdomain = shop
-      a.insales_password = password
-      a.insales_id = insales_id
+    acc = Account.where(insales_id: insales_id, insales_subdomain: shop, deleted: true).first
+
+    if acc.present?
+      acc.update_attributes(insales_password: password, deleted: false)
+      acc
+    else
+      Account.create! do |a|
+        a.insales_subdomain = shop
+        a.insales_password = password
+        a.insales_id = insales_id
+      end
     end
   end
 

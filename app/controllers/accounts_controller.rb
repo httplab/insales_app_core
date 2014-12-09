@@ -5,7 +5,7 @@ class AccountsController < ApplicationController
     if Account.installed? params
       render nothing: true, status: 422
     else
-      @new_account = Account.create_by_insales_request! params
+      @new_account = Account.create_by_insales_request!(params)
       InsalesAppCore::Synchronization::FirstSyncWorker.perform_async(@new_account.id)
       render nothing: true, status: 200
     end
