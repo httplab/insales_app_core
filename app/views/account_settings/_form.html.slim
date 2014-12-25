@@ -1,8 +1,12 @@
--case setting.control
--when :select
+- case setting.control
+- when :select
   =select_tag setting.name, options_for_select(setting.allowed_values(current_account), current_account.get_setting(setting.name))
--when :checkbox
+- when :checkbox
   =check_box_tag setting.name, '1', current_account.get_setting(setting.name)
--else
+- when :text_field
+  =text_field_tag setting.name, current_account.get_setting(setting.name)
+- when :text_area
+  =text_area_tag setting.name, current_account.get_setting(setting.name)
+- else
   =text_field_tag setting.name, current_account.get_setting(setting.name)
 
