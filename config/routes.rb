@@ -1,4 +1,14 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
+  sidekiq_app = Rack::Auth::Basic.new(Sidekiq::Web) do |username, password|
+    username == ENV['SIDEKIQ_AREA_USER'] && password == ENV['SIDEKIQ_AREA_PASS']
+  end
+
+  mount sidekiq_app, at: '/sidekiq'
+
+  mount sidekiq_app, at: '/sidekiq'
+
   get '/accounts/install' => 'accounts#install'
   get '/accounts/uninstall' => 'accounts#uninstall'
 

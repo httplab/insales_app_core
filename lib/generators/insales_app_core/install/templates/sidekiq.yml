@@ -1,0 +1,4 @@
+---
+:queues:
+  - default
+  - first_sync_queue

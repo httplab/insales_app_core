@@ -7,6 +7,7 @@ class InsalesAppCore::InstallGenerator < Rails::Generators::Base
 
   def configuration
     copy_file 'insales_app_core.rb', 'config/initializers/insales_app_core.rb'
+    copy_file 'sidekiq.yml', 'config/sidekiq.yml'
   end
 
   def add_assets
@@ -33,7 +34,9 @@ class InsalesAppCore::InstallGenerator < Rails::Generators::Base
         "\nINSALES_API_KEY: '#{app_name}'\n" +
         "INSALES_API_SECRET: 'xa0242zz4e477f4e2f36016e72f0990a'\n" +
         "INSALES_API_HOST: 'localhost:3000'\n" +
-        "INSALES_API_AUTOLOGIN_PATH: 'session/autologin'"
+        "INSALES_API_AUTOLOGIN_PATH: 'session/autologin'\n" +
+        "SIDEKIQ_AREA_USER: 'admin'\n" +
+        "SIDEKIQ_AREA_PASS: 'admin'"
       end
     end
   end

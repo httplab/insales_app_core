@@ -34,4 +34,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'bootstrap_form'
   s.add_dependency 'high_voltage', '~> 2.2.0'
   s.add_dependency 'just_one_lock', '~> 0.2'
+  s.add_dependency 'sidekiq'
+  s.add_dependency 'sinatra'
 end
