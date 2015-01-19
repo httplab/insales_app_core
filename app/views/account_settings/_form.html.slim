@@ -7,6 +7,12 @@
   =text_field_tag setting.name, current_account.get_setting(setting.name)
 - when :text_area
   =text_area_tag setting.name, current_account.get_setting(setting.name)
+- when :checkbox_group
+  - setting.allowed_values(current_account).each do |s|
+    label>
+      = check_box_tag "#{setting.name}[]", s[1], current_account.get_setting(setting.name).include?(s[1].to_s)
+      = s[0]
+
 - else
   =text_field_tag setting.name, current_account.get_setting(setting.name)
 

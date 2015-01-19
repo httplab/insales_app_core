@@ -22,6 +22,8 @@ class InsalesAppCore::AccountSetting
       raw_value.to_i
     when :boolean
       [1, '1', 'true', true, 'on', :on, :true].include?(raw_value)
+    when :string_set
+      raw_value.split('%')
     else
       raw_value
     end
@@ -35,6 +37,8 @@ class InsalesAppCore::AccountSetting
       else
         'false'
       end
+    when :string_set
+      user_value.map(&:to_s).uniq.join('%')
     else
       user_value
     end
