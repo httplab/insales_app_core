@@ -1,6 +1,6 @@
 module InsalesAppCore::Synchronization
   class FirstSyncWorker
-    include Sidekiq::Worker
+    include ::Sidekiq::Worker
 
     sidekiq_options queue: :first_sync_queue
 
