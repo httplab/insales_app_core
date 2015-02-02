@@ -10,6 +10,8 @@ require 'kaminari'
 require 'bootstrap-kaminari-views'
 require 'bootstrap-sass'
 require 'high_voltage'
+require 'sidekiq'
+
 
 module InsalesAppCore
   autoload :TestHelpers, 'insales_app_core/test_helpers'
