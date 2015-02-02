@@ -1,18 +1,27 @@
-- case setting.control
-- when :select
-  =select_tag setting.name, options_for_select(setting.allowed_values(current_account), current_account.get_setting(setting.name))
-- when :checkbox
-  =check_box_tag setting.name, '1', current_account.get_setting(setting.name)
-- when :text_field
-  =text_field_tag setting.name, current_account.get_setting(setting.name)
-- when :text_area
-  =text_area_tag setting.name, current_account.get_setting(setting.name)
-- when :checkbox_group
-  - setting.allowed_values(current_account).each do |s|
-    label>
-      = check_box_tag "#{setting.name}[]", s[1], current_account.get_setting(setting.name).include?(s[1].to_s)
-      = s[0]
 
-- else
-  =text_field_tag setting.name, current_account.get_setting(setting.name)
+.form-group
+  label.col-sm-3(for=setting.name)
+    = setting.title
+  .col-sm-9
+    - case setting.control
+    - when :select
+      =select_tag setting.name, options_for_select(setting.allowed_values(current_account), current_account.get_setting(setting.name)), class: 'form-control'
+    - when :checkbox
+      .checkbox
+        =check_box_tag setting.name, '1', current_account.get_setting(setting.name)
+    - when :text_field
+      =text_field_tag setting.name, current_account.get_setting(setting.name), class: 'form-control'
+    - when :text_area
+      =text_area_tag setting.name, current_account.get_setting(setting.name), class: 'form-control'
+    - when :checkbox_group
+      - setting.allowed_values(current_account).each do |s|
+        .checkbox
+          label>
+            = check_box_tag "#{setting.name}[]", s[1], current_account.get_setting(setting.name).include?(s[1].to_s)
+            = s[0]
+
+    - else
+      =text_field_tag setting.name, current_account.get_setting(setting.name), class: 'form-control'
+
+    span.help-block = setting.description
 

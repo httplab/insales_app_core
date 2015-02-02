@@ -2,14 +2,7 @@
   h1 = AccountSettings.model_name.human.capitalize
   .row
     .col-md-12
-      =form_tag account_settings_path, method: :put
-        table.table.table-bordered.table-striped
-          -@settings.each do |s|
-            tr
-              th 
-                =s.title
-                -if s.required
-                  |*
-                p.text-muted = s.description
-              td = render 'form', setting: s
-        =submit_tag t('.submit'), class: 'btn btn-success'
+      =form_tag account_settings_path, method: :put, class: 'form-horizontal'
+        - @settings.each do |s|
+          td = render 'form', setting: s
+        = submit_tag t('.submit'), class: 'btn btn-success'

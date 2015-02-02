@@ -16,7 +16,7 @@ class AccountSettingsController < ApplicationController
       flash[:error] = ex.message
     end
 
-    redirect_to edit_account_settings_path
+    redirect_to root_path
   end
 
 end
