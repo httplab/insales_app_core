@@ -1,6 +1,5 @@
 class InsalesAppCore::AppMenu::MenuItem
   attr_accessor :submenu
-  attr_accessor :title
   attr_accessor :home
   attr_accessor :active
 
@@ -8,7 +7,7 @@ class InsalesAppCore::AppMenu::MenuItem
   alias_method :active?, :active
 
   def initialize(title, path_params = {}, &block)
-    self.title = title
+    @title = title
 
     if block_given?
       self.submenu = InsalesAppCore::AppMenu.new(&block)
@@ -38,5 +37,9 @@ class InsalesAppCore::AppMenu::MenuItem
 
   def path=(str)
     @path = str
+  end
+
+  def title
+    I18n.t(@title)
   end
 end

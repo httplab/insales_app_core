@@ -48,6 +48,10 @@ ru:
         notice: Настройки изменены
         alert: Настройки не были изменены
 
+  admin:
+    main_menu:
+      accounts: Аккаунты
+
   activerecord:
     models:
       account_settings: настройки аккаунта
