@@ -9,6 +9,10 @@ module InsalesAppCore
 
     attr_accessor :sync_observers
 
+    def sync_enabled?
+      @sync_options.any?{|k,v| v}
+    end
+
     def initialize(&blk)
       blk.call self if block_given?
 

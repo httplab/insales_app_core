@@ -33,7 +33,7 @@ html
       .container-fluid
         / Вешаем сообщение о том, что первоначальная синхронизация еще не была завершена
         / если она не была завершена.
-        - unless current_account.initial_sync_completed?
+        - if InsalesAppCore.config.sync_enabled? && !current_account.initial_sync_completed?
           .alert.alert-warning
             | Первоначальная синхронизация с InSales еще не завершена.
               В зависимости от загруженности сервиса процесс синхронизации может занять более 10 минут.
