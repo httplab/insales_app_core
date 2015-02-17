@@ -38,13 +38,14 @@ class Account < ActiveRecord::Base
     acc = Account.where(insales_id: insales_id, insales_subdomain: shop, deleted: true).first
 
     if acc.present?
-      acc.update_attributes(insales_password: password, deleted: false)
+      acc.update_attributes(insales_password: password, deleted: false, last_install_date: DateTime.current)
       acc
     else
       Account.create! do |a|
         a.insales_subdomain = shop
         a.insales_password = password
         a.insales_id = insales_id
+        a.last_install_date = DateTime.curent
       end
     end
   end
