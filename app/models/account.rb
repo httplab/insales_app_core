@@ -45,7 +45,7 @@ class Account < ActiveRecord::Base
         a.insales_subdomain = shop
         a.insales_password = password
         a.insales_id = insales_id
-        a.last_install_date = DateTime.curent
+        a.last_install_date = DateTime.current
       end
     end
   end
