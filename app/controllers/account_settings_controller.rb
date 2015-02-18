@@ -12,11 +12,13 @@ class AccountSettingsController < ApplicationController
         val = params[s.name]
         current_account.set_setting(s.name, val)
       end
+      if current_account.respond_to?(:settings_changed)
+        current_account.settings_changed
+      end
     rescue => ex
       flash[:error] = ex.message
     end
 
     redirect_to root_path
   end
-
 end
