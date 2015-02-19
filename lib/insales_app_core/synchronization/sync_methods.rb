@@ -1,8 +1,18 @@
 module InsalesAppCore
   module Synchronization
     module SyncMethods
-      def sync(recent: true)
+      def safe_perform(&block)
         begin
+          yield self
+        rescue => ex
+          changed
+          notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
+          ::Rollbar.report_exception(ex)
+        end
+      end
+
+      def sync(recent: true)
+        safe_perform do
           begin_sync
 
           stage("Synchroniznig account #{@account.insales_subdomain}")
@@ -26,10 +36,6 @@ module InsalesAppCore
           sync_orders(ls)
 
           end_sync
-        rescue => ex
-          changed
-          notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
-          ::Rollbar.report_exception(ex)
         end
       end
     end

@@ -140,12 +140,7 @@ module InsalesAppCore
           end
         end
 
-        if remote_ids.any? && updated_since.nil?
-          deleted = Product.where('account_id = ? AND insales_id NOT IN (?)', account_id, remote_ids).delete_all
-          changed
-          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
-        end
-
+        delete_remotely_deleted_products(remote_ids, updated_since)
         @account.save!
       end
 
@@ -250,26 +245,57 @@ module InsalesAppCore
       def sync_orders(updated_since = nil)
         return if !@sync_options[:orders]
         @account.orders_last_sync = DateTime.now
+        remote_ids = []
         report_stage('orders', updated_since)
         get_paged(InsalesApi::Order, 250, updated_since: updated_since) do |page_result|
+          remote_ids += page_result.map(&:id)
           page_result.each do |remote_order|
             sync_one_order(remote_order)
           end
         end
 
-        delete_remotely_deleted_orders(updated_since)
+        delete_remotely_deleted_orders(remote_ids, updated_since)
         @account.save!
       end
 
-      def delete_remotely_deleted_orders(updated_since = nil)
-        remote_ids = []
-        puts updated_since
-        get_paged(InsalesApi::Order, 250, updated_since: updated_since, deleted: true) do |page_result|
-          remote_ids += page_result.map(&:id)
+      def delete_remotely_deleted_orders(present_ids = nil, updated_since = nil)
+        stage("Synchroniznig deleted orders for #{@account.insales_subdomain} (since #{updated_since})")
+
+        if updated_since || present_ids.nil?
+          remote_ids = []
+
+          get_paged(InsalesApi::Order, 250, updated_since: updated_since, deleted: true) do |page_result|
+            remote_ids += page_result.map(&:id)
+          end
+        else
+          remote_ids = @account.orders.where('insales_id NOT IN (?)', present_ids).pluck(:insales_id)
         end
 
         if remote_ids.any?
           deleted = Order.where('account_id = ? AND insales_id IN (?)', account_id, remote_ids).delete_all
+          if deleted > 0
+            changed
+            notify_observers(ENTITY_DELETED, deleted, nil, account_id)
+          end
+        end
+      end
+
+      def delete_remotely_deleted_products(present_ids = nil, updated_since = nil)
+        stage("Synchroniznig deleted products for #{@account.insales_subdomain} (since #{updated_since})")
+        if updated_since || present_ids.nil?
+          remote_ids = []
+
+          get_paged(InsalesApi::Product, 250, updated_since: updated_since, deleted: true) do |page_result|
+            remote_ids += page_result.map(&:id)
+          end
+
+          # puts "#{remote_ids.inspect}, #{@account.insales_subdomain}".red
+        else
+          remote_ids = @account.orders.where('insales_id NOT IN (?)', present_ids).pluck(:insales_id)
+        end
+
+        if remote_ids.any?
+          deleted = Product.where('account_id = ? AND insales_id IN (?)', account_id, remote_ids).delete_all
           if deleted > 0
             changed
             notify_observers(ENTITY_DELETED, deleted, nil, account_id)
