@@ -10,7 +10,7 @@ module InsalesAppCore
     attr_accessor :sync_observers
 
     def sync_enabled?
-      @sync_options.any?{|k,v| v}
+      @sync_options && @sync_options.any?{|k,v| v}
     end
 
     def initialize(&blk)
