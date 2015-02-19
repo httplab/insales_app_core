@@ -403,10 +403,12 @@ module InsalesAppCore
         p local_client.attributes
       end
 
-      def sync_collections
+      def sync_collections(updated_since = nil)
         return if !@sync_options[:collections]
-        stage("Synchroniznig collections #{@account.insales_subdomain}")
-        remote_collections = safe_api_call{InsalesApi::Collection.all}
+        @account.collections_last_sync = DateTime.now
+
+        report_stage('collections', updated_since)
+        remote_collections = safe_api_call{InsalesApi::Collection.all(params:{updated_since: updated_since})}
 
         remote_collections.each do |remote_collection|
           local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
@@ -414,17 +416,21 @@ module InsalesAppCore
           local_collection.save!(validate: false)
         end
 
-        local_collections = Collection.where(account_id: account_id)
-        remote_collections_ids = Set.new(remote_collections.map(&:id))
+        if updated_since.nil?
+          local_collections = Collection.where(account_id: account_id)
+          remote_collections_ids = Set.new(remote_collections.map(&:id))
 
-        local_collections.each do |local_collection|
-          if !remote_collections_ids.include?(local_collection.insales_id)
-            changed
-            notify_observers(ENTITY_DELETED, local_collection, account_id)
-            local_collection.delete
-            next
+          local_collections.each do |local_collection|
+            if !remote_collections_ids.include?(local_collection.insales_id)
+              changed
+              notify_observers(ENTITY_DELETED, local_collection, account_id)
+              local_collection.delete
+              next
+            end
           end
         end
+
+        @account.save
       end
 
       def sync_collects
@@ -441,9 +447,9 @@ module InsalesAppCore
         local_pairs = Collect.where('account_id = ?', account_id).pluck(:insales_collection_id, :insales_product_id)
 
         pairs_to_delete = local_pairs - remote_pairs
-        pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]},#{p[1]})"}.join(',')
-        Collect.where('(insales_collection_id, insales_product_id) IN (?)', pairs_to_delete).delete_all if pairs_to_delete.present?
-
+        pairs_to_delete = pairs_to_delete.map {|p| "(#{p[0]}, #{p[1]})"}.join(',')
+        collects_to_delete = Collect.where("(insales_collection_id, insales_product_id) IN (#{pairs_to_delete})")
+        collects_to_delete.delete_all if pairs_to_delete.present?
         pairs_to_create = remote_pairs - local_pairs
         values_clause = pairs_to_create.map {|v| "(#{v[0]},#{v[1]},#{account_id})"}.join(',')
 

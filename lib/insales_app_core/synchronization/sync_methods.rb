@@ -6,7 +6,10 @@ module InsalesAppCore
           begin_sync
 
           stage("Synchroniznig account #{@account.insales_subdomain}")
-          sync_collections
+
+          ls = @account.collections_last_sync if recent
+          sync_collections(ls)
+
           sync_categories
           sync_properties
 

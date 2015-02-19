@@ -90,7 +90,7 @@ class Account < ActiveRecord::Base
     arr.map { |m| DateTime.parse(m) }.max
   end
 
-  [:orders, :products, :clients].each do |ent|
+  [:orders, :products, :clients, :collections].each do |ent|
     define_method ("#{ent}_last_sync") do
       (sync_settings || {})[ent.to_s]
     end
