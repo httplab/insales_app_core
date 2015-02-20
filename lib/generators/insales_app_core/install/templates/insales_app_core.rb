@@ -20,8 +20,10 @@ InsalesAppCore.setup do |config|
     orders: true,
     order_lines: true,
     shipping_addresses: true,
-    clients: true
-  }
+    clients: true,
+    product_fields: true,
+    product_field_values: true
+  }-
 
   # Добавить в виде строк имена обзерверов для синхронизации.
   # config.sync_observers = ['AppNamespace::OrdersObserver']

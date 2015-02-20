@@ -2,13 +2,11 @@ module InsalesAppCore
   module Synchronization
     module SyncMethods
       def safe_perform(&block)
-        begin
-          yield self
-        rescue => ex
-          changed
-          notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
-          ::Rollbar.report_exception(ex)
-        end
+        yield self
+      rescue => ex
+        changed
+        notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
+        ::Rollbar.report_exception(ex)
       end
 
       def sync(recent: true)
@@ -22,6 +20,7 @@ module InsalesAppCore
 
           sync_categories
           sync_properties
+          sync_product_fields
 
           ls = @account.products_last_sync if recent
           sync_products(ls)

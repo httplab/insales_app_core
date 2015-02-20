@@ -15,6 +15,8 @@ class Product < ActiveRecord::Base
   has_many :order_lines, primary_key: :insales_id, foreign_key: :insales_product_id
   has_many :product_characteristics, primary_key: :insales_id, foreign_key: :insales_product_id
   has_many :characteristics, through: :product_characteristics
+  has_many :product_field_values, primary_key: :insales_id, foreign_key: :insales_product_id,
+           dependent: :delete_all
 
   maps_to_insales category_id: :insales_category_id
   scope :by_category_id, ->(category_id) { Category.find(category_id).nested_products.order(:category_id) }

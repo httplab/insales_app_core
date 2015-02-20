@@ -111,8 +111,30 @@ module InsalesAppCore
         end
       end
 
+      def sync_product_fields
+        return unless @sync_options[:product_fields]
+        report_stage('product fields')
+
+        remote_product_fields = safe_api_call{InsalesApi::ProductField.all}
+
+        remote_product_fields.each do |remote_product_field|
+          local_product_field = ProductField.update_or_create_by_insales_entity(remote_product_field, account_id: account_id)
+          update_event(local_product_field, remote_product_field)
+          local_product_field.save!(validate: false)
+        end
+
+        remote_product_fields_ids = remote_product_fields.map(&:id)
+
+        deleted = @account.product_fields.where.not(insales_id: remote_product_fields_ids).delete_all
+
+        if deleted > 0
+          changed
+          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
+        end
+      end
+
       def sync_products(updated_since = nil)
-        return if !@sync_options[:products]
+        return unless @sync_options[:products]
         @account.products_last_sync = DateTime.now
 
         report_stage('products', updated_since)
@@ -130,6 +152,7 @@ module InsalesAppCore
               sync_variants(remote_product)
               sync_images(remote_product)
               sync_characteristics(remote_product, local_product)
+              sync_product_field_values(remote_product)
             rescue => ex
               puts ex.message
               if local_product
@@ -142,6 +165,35 @@ module InsalesAppCore
 
         delete_remotely_deleted_products(remote_ids, updated_since)
         @account.save!
+      end
+
+      def sync_product_field_values(remote_product)
+        return unless @sync_options[:product_field_values]
+
+        remote_product_field_values = remote_product.product_field_values
+        remote_product_field_values_ids = remote_product_field_values.map(&:id)
+
+        deleted = ProductFieldValue
+          .where(insales_product_id: remote_product.id)
+          .where.not(insales_id: remote_product_field_values_ids)
+          .delete_all
+
+        if deleted > 0
+          changed
+          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
+        end
+
+        remote_product_field_values.each do |rpfv|
+          begin
+            lpfv = ProductFieldValue.update_or_create_by_insales_entity(rpfv, insales_product_id: remote_product.id)
+            update_event(lpfv, rpfv)
+            lpfv.save!(validate: false)
+          rescue
+            p rpfv
+            p lpfv
+            raise
+          end
+        end
       end
 
       def sync_variants(remote_product)
