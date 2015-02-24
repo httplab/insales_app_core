@@ -7,18 +7,20 @@ module InsalesAppCore
         include InsalesAppCore::ModelExtensions::Synced
       end
 
-      def set_attributes_by_insales_entity(insales_entity, attributes = {})
-        local_attributes = attribute_names.map(&:to_sym)
+      def is_assignable_attribute?(v)
+        attribute_names.map(&:to_sym).include?(v)
+      end
 
+      def set_attributes_by_insales_entity(insales_entity, attributes = {})
         insales_entity.attributes.each do |a, v|
           local_field = self.class.get_local_field(a.to_sym)
-          next unless local_attributes.include?(local_field)
-          self[local_field] = v
+          next unless is_assignable_attribute?(local_field)
+          self.send("#{local_field}=", v)
         end
 
         attributes.each do |k, v|
-          next unless local_attributes.include?(k.to_sym)
-          self[k.to_sym] = v
+          next unless is_assignable_attribute?(k.to_sym)
+          self.send("#{k}=", v)
         end
 
         self

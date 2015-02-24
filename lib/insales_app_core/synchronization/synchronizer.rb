@@ -217,13 +217,14 @@ module InsalesAppCore
             local_variant.save!(validate: false)
           rescue => ex
             puts ex.message
+            puts ex.backtrace
             puts remote_variant.inspect
           end
         end
       end
 
       def sync_images(remote_product)
-        return if !@sync_options[:images]
+        return unless @sync_options[:images]
         remote_images = remote_product.images
 
         remote_images.each do |remote_image|
