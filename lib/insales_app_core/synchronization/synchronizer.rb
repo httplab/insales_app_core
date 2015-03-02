@@ -167,6 +167,32 @@ module InsalesAppCore
         @account.save!
       end
 
+      def delete_remotely_deleted_products(present_ids = nil, updated_since = nil, force_use_present = false)
+        stage("Synchroniznig deleted products for #{@account.insales_subdomain} (since #{updated_since})")
+
+        present_ids ||= get_paged(InsalesApi::Product, 250).map(&:id) if force_use_present
+
+        if updated_since || present_ids.nil?
+          remote_ids = []
+
+          get_paged(InsalesApi::Product, 250, updated_since: updated_since, deleted: true) do |page_result|
+            remote_ids += page_result.map(&:id)
+          end
+
+          # puts "#{remote_ids.inspect}, #{@account.insales_subdomain}".red
+        else
+          remote_ids = @account.products.where('insales_id NOT IN (?)', present_ids).pluck(:insales_id)
+        end
+
+        if remote_ids.any?
+          deleted = Product.where('account_id = ? AND insales_id IN (?)', account_id, remote_ids).delete_all
+          if deleted > 0
+            changed
+            notify_observers(ENTITY_DELETED, deleted, nil, account_id)
+          end
+        end
+      end
+
       def sync_product_field_values(remote_product)
         return unless @sync_options[:product_field_values]
 
@@ -333,29 +359,6 @@ module InsalesAppCore
         end
       end
 
-      def delete_remotely_deleted_products(present_ids = nil, updated_since = nil)
-        stage("Synchroniznig deleted products for #{@account.insales_subdomain} (since #{updated_since})")
-        if updated_since || present_ids.nil?
-          remote_ids = []
-
-          get_paged(InsalesApi::Product, 250, updated_since: updated_since, deleted: true) do |page_result|
-            remote_ids += page_result.map(&:id)
-          end
-
-          # puts "#{remote_ids.inspect}, #{@account.insales_subdomain}".red
-        else
-          remote_ids = @account.orders.where('insales_id NOT IN (?)', present_ids).pluck(:insales_id)
-        end
-
-        if remote_ids.any?
-          deleted = Product.where('account_id = ? AND insales_id IN (?)', account_id, remote_ids).delete_all
-          if deleted > 0
-            changed
-            notify_observers(ENTITY_DELETED, deleted, nil, account_id)
-          end
-        end
-      end
-
       def sync_one_order(remote_order)
         local_order = Order.update_or_create_by_insales_entity(remote_order, account_id: account_id, insales_client_id: remote_order.client.id)
 
@@ -447,7 +450,7 @@ module InsalesAppCore
         @account.clients_last_sync = DateTime.now
         report_stage('clients', updated_since)
         remote_ids = []
-        puts updated_since
+
         get_paged(InsalesApi::Client, 250, updated_since: updated_since) do |page_result|
           remote_ids += page_result.map(&:id)
           page_result.each do |remote_client|
@@ -540,7 +543,9 @@ module InsalesAppCore
       # Постраничное получение сущностей
       def get_paged(type, page_size = nil, addl_params = {})
         page = 1
+        res = []
         while true do
+
           params = {
             page: page
           }
@@ -551,13 +556,10 @@ module InsalesAppCore
 
           # https://github.com/rails/activeresource/commit/c665bf3c7ccc834017a2168ee3c8a68a622b70e6
           # Пока это не попадет в релиз, придется использовать to_a
-          return if page_result.to_a.empty?
-
-          if(block_given?)
-            yield page_result
-          end
-
-          page+=1
+          return res if page_result.to_a.empty?
+          yield page_result if block_given?
+          page += 1
+          res += page_result.to_a
         end
       end
 

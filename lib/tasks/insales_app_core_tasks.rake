@@ -20,7 +20,7 @@ namespace :insales_sync do
   end
 
   desc 'Delete all deleted products and orders'
-  task sync_deleted_orders_and_products: :environment do
+  task deleted_orders_and_products: :environment do
     prevent_multiple_executions do
       Parallel.each(Account.for_sync, in_threads: 4) do |a|
         ActiveRecord::Base.connection_pool.with_connection do
@@ -30,7 +30,7 @@ namespace :insales_sync do
 
           syncronizer.safe_perform do |s|
             s.delete_remotely_deleted_orders
-            s.delete_remotely_deleted_products
+            s.delete_remotely_deleted_products(nil, nil, true)
           end
         end
       end
