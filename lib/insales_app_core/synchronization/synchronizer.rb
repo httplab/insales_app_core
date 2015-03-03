@@ -422,10 +422,15 @@ module InsalesAppCore
         remote_ids = remote_order_lines.map(&:id)
 
         remote_order_lines.each do |remote_order_line|
-          local_order_line = OrderLine.update_or_create_by_insales_entity(remote_order_line,
-            account_id: account_id, insales_order_id: insales_order_id)
-          update_event(local_order_line, remote_order_line)
-          local_order_line.save!(validate: false)
+          begin
+            local_order_line = OrderLine.update_or_create_by_insales_entity(remote_order_line,
+              account_id: account_id, insales_order_id: insales_order_id)
+            update_event(local_order_line, remote_order_line)
+            local_order_line.save!(validate: false)
+          rescue => ex
+            changed
+            notify_observers(ERROR, ex, account_id)
+          end
         end
 
         if remote_ids.any?
