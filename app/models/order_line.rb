@@ -1,5 +1,5 @@
 class OrderLine < ActiveRecord::Base
-  validates :insales_id, :insales_product_id, :insales_variant_id,
+  validates :insales_id, :insales_variant_id,
             :quantity, :account_id, :insales_order_id, presence: true
 
   belongs_to :order, dependent: :delete, primary_key: :insales_id, foreign_key: :insales_order_id
