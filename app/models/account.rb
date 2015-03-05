@@ -30,6 +30,10 @@ class Account < ActiveRecord::Base
     Account.exists?(insales_subdomain: shop, insales_password: password, deleted: false)
   end
 
+  def insales_account
+    configure_api
+    InsalesApi::Account.find
+  end
 
   def self.create_by_insales_request!(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
