@@ -1,12 +1,19 @@
+require 'active_resource'
+
 module InsalesAppCore
   module Synchronization
     module SyncMethods
+      SKIP_ROLLBAR_EXCEPTIONS = [::ActiveResource::UnauthorizedAccess]
+
       def safe_perform(&block)
         yield self
       rescue => ex
         changed
         notify_observers(::InsalesAppCore::Synchronization::Synchronizer::ERROR, ex, account_id)
-        ::Rollbar.report_exception(ex)
+
+        unless SKIP_ROLLBAR_EXCEPTIONS.any? {|klass| ex.is_a? klass}
+          ::Rollbar.report_exception(ex)
+        end
       end
 
       def sync(recent: true)
