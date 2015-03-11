@@ -15,6 +15,7 @@ class Account < ActiveRecord::Base
   has_many :properties
   has_many :characteristics
   has_many :product_fields
+  has_many :domains
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
