@@ -32,7 +32,10 @@ module InsalesAppCore
         orders: true,
         order_lines: true,
         shipping_addresses: true,
-        clients: true
+        clients: true,
+        product_fields: true,
+        product_field_values: true,
+        domains: true
       }
 
       def initialize(account_id, options = {})
@@ -53,6 +56,27 @@ module InsalesAppCore
           changed
           notify_observers(ERROR, ex, account_id)
           retry
+        end
+      end
+
+      def sync_domains
+        return if !@sync_options[:domains]
+        stage("Synchroniznig domains #{@account.insales_subdomain}")
+        remote_domains = safe_api_call{InsalesApi::Domains.all}
+
+        remote_domains.each do |remote_domain|
+          local_domain = Domain.update_or_create_by_insales_entity(remote_domain, account_id: account_id)
+          update_event(local_domain, remote_domain)
+          local_domain.save!(validate: false)
+        end
+
+
+        remote_domains_ids = remote_domains.map(&:id)
+        deleted = @account.domains.where.not(insales_id: remote_domains_ids).delete_all
+
+        if deleted > 0
+          changed
+          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
         end
       end
 

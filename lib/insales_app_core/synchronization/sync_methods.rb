@@ -18,6 +18,7 @@ module InsalesAppCore
           ls = @account.collections_last_sync if recent
           sync_collections(ls)
 
+          sync_domains
           sync_categories
           sync_properties
           sync_product_fields
