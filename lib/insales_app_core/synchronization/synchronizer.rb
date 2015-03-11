@@ -62,7 +62,7 @@ module InsalesAppCore
       def sync_domains
         return if !@sync_options[:domains]
         stage("Synchroniznig domains #{@account.insales_subdomain}")
-        remote_domains = safe_api_call{InsalesApi::Domains.all}
+        remote_domains = safe_api_call{InsalesApi::Domain.all}
 
         remote_domains.each do |remote_domain|
           local_domain = Domain.update_or_create_by_insales_entity(remote_domain, account_id: account_id)
