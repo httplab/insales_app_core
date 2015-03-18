@@ -66,5 +66,9 @@ module InsalesAppCoreHelper
 
     link_to name, options, html_options, &block
   end
+
+  def controller_action_class
+    [controller.class.name.underscore.parameterize.dasherize, action_name].join(' ')
+  end
 end
 

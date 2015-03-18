@@ -28,7 +28,7 @@ html
       .container-fluid
         = render_app_menu(InsalesAppCore.config)
 
-    #page-content class="#{controller_name.dasherize} #{action_name.dasherize}"
+    #page-content class=controller_action_class
       = render 'layouts/flash_messages'
       .container-fluid
         / Вешаем сообщение о том, что первоначальная синхронизация еще не была завершена
