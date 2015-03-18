@@ -7,23 +7,23 @@ InsalesAppCore.setup do |config|
 
   # Включение синхронизации отдельных сущностей
   config.sync_options = {
-    categories: true,
-    collections: true,
-    collects: true,
-    products: true,
-    images: true,
-    variants: true,
-    fields: true,
-    fields_values: true,
-    properties: true,
-    characteristics: true,
-    orders: true,
-    order_lines: true,
-    shipping_addresses: true,
-    clients: true,
-    product_fields: true,
-    product_field_values: true,
-    domains: true
+    categories:              false,
+    collections:             false,
+    collects:                false,
+    products:                false,
+    images:                  false,
+    variants:                false,
+    fields:                  false,
+    fields_values:           false,
+    properties:              false,
+    characteristics:         false,
+    orders:                  false,
+    order_lines:             false,
+    shipping_addresses:      false,
+    clients:                 false,
+    product_fields:          false,
+    product_field_values:    false,
+    domains:                 false
   }
 
   # Добавить в виде строк имена обзерверов для синхронизации.

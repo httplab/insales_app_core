@@ -19,23 +19,23 @@ module InsalesAppCore
       ERROR = 9
 
       DEFAULT_SYNC_OPTIONS = {
-        categories: true,
-        collections: true,
-        collects: true,
-        products: true,
-        images: true,
-        variants: true,
-        fields: true,
-        fields_values: true,
-        properties: true,
-        characteristics: true,
-        orders: true,
-        order_lines: true,
-        shipping_addresses: true,
-        clients: true,
-        product_fields: true,
-        product_field_values: true,
-        domains: true
+        categories:              false,
+        collections:             false,
+        collects:                false,
+        products:                false,
+        images:                  false,
+        variants:                false,
+        fields:                  false,
+        fields_values:           false,
+        properties:              false,
+        characteristics:         false,
+        orders:                  false,
+        order_lines:             false,
+        shipping_addresses:      false,
+        clients:                 false,
+        product_fields:          false,
+        product_field_values:    false,
+        domains:                 false
       }
 
       def initialize(account_id, options = {})
@@ -624,8 +624,6 @@ module InsalesAppCore
 
       def normalize_sync_options(sync_options)
         @sync_options = DEFAULT_SYNC_OPTIONS.merge(sync_options || {})
-        @sync_options[:fields] = @sync_options[:fields] || @sync_options[:fields_values]
-        @sync_options
       end
 
       def report_stage(entity, updated_since = nil)
