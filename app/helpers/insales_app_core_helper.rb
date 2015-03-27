@@ -70,5 +70,26 @@ module InsalesAppCoreHelper
   def controller_action_class
     [controller.class.name.underscore.parameterize.dasherize, action_name].join(' ')
   end
-end
 
+  def render_payment_form(entity, description)
+    fields = { MrchLogin: ENV['ROBOKASSA_LOGIN'],
+               Desc: description,
+               secret: ENV['ROBOKASSA_PASSWORD1'],
+               Culture: :ru }
+    options = { service: :robokassa,
+                secret: fields[:secret],
+                amount: entity.amount }
+
+    payment_service_for entity.id, ENV['ROBOKASSA_LOGIN'], options do |service|
+      fields.each do |key, value|
+        service.add_field(key, value)
+      end
+
+      yield service if block_given?
+    end
+  end
+
+  def render_currency(number)
+    number_to_currency(number, unit: "руб.", separator: ".", delimiter: " ", format: "%n %u")
+  end
+end

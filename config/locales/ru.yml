@@ -26,6 +26,12 @@ ru:
     pending: не оплачен
     paid: оплачен
 
+  balance_replenishments:
+    new:
+      amount_hint: Сумма будет округлена до целого числа
+      submit: Пополнить счет
+    create:
+      title: Перенаправление в платежную систему...
   account_settings:
     edit:
       submit: Сохранить
@@ -48,6 +54,8 @@ ru:
         notice: Настройки изменены
         alert: Настройки не были изменены
 
+  main_menu:
+    balance: Баланс
   admin:
     main_menu:
       accounts: Аккаунты
@@ -80,3 +88,5 @@ ru:
         financial_status: Статус оплаты
         delivery_description: Способ доставки
         client_name: Клиент
+      balance_replenishment:
+        amount: Сумма

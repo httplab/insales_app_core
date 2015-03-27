@@ -7,8 +7,6 @@ Rails.application.routes.draw do
 
   mount sidekiq_app, at: '/sidekiq'
 
-  mount sidekiq_app, at: '/sidekiq'
-
   get '/accounts/install' => 'accounts#install'
   get '/accounts/uninstall' => 'accounts#uninstall'
 
@@ -27,6 +25,14 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :accounts, only: :index
     root to: redirect('/admin/accounts')
+  end
+
+  resources :balance_replenishments, only: [:index, :new, :create]
+
+  scope 'robokassa' do
+    get 'result' => 'robokassa#paid', as: :robokassa_paid # to handle Robokassa push request
+    get 'success' => 'robokassa#success', as: :robokassa_success # to handle Robokassa success redirect
+    get 'fail' => 'robokassa#fail', as: :robokassa_fail # to handle Robokassa fail redirect
   end
 
   get "/pages/*id" => 'pages#show', format: false

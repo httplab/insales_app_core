@@ -36,4 +36,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'just_one_lock', '~> 0.2.1'
   s.add_dependency 'sidekiq'
   s.add_dependency 'sinatra'
+  s.add_dependency 'activemerchant'
+  s.add_dependency 'offsite_payments'
+  s.add_dependency 'rollbar'
 end

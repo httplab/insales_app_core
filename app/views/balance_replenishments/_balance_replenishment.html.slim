@@ -1,0 +1,6 @@
+tr
+  td = I18n.l balance_replenishment.created_at, format: :short
+  td
+    .income доход
+  td = render_currency balance_replenishment.amount
+  td = render_currency current_account.balance(balance_replenishment.created_at)

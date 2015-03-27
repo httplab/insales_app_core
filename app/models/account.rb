@@ -17,6 +17,7 @@ class Account < ActiveRecord::Base
   has_many :product_fields
   has_many :domains
   has_one :main_domain, ->{where(main: true)}, class_name: 'Domain'
+  has_many :balance_replenishments
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
@@ -30,6 +31,11 @@ class Account < ActiveRecord::Base
     password = InsalesApi::App.password_by_token(params[:token])
 
     Account.exists?(insales_subdomain: shop, insales_password: password, deleted: false)
+  end
+
+  def balance(date = nil)
+    date ||= DateTime.current
+    balance_replenishments.before_date(date).sum(:amount)
   end
 
   def insales_account
