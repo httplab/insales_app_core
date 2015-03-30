@@ -20,6 +20,7 @@ tags
 *.sublime-workspace
 .idea
 *.swp
+*.swo
 
 /config/database.yml
 /config/application.yml

@@ -5,6 +5,10 @@ ru:
     formats:
       insales_long: "%d.%m.%Y %H:%M"
 
+  robokassa:
+    payment_success: Платеж успешно произведен
+    payment_fail: Не удалось произвести платеж. Пожалуйста, обратитесь в службу поддержки пользователей
+
   cancel: Отмена
   'true': да
   'false': нет

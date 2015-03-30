@@ -11,9 +11,6 @@ class RobokassaController < ApplicationController
   # Robokassa call this action after transaction
   def paid
     notification = Robokassa::Notification.new(request.raw_post, secret: ENV['ROBOKASSA_PASSWORD2'])
-    Rails.logger.info "=======0 #{request.raw_post} ======="
-    Rails.logger.info "=======1 #{notification.item_id.inspect} ======="
-    Rails.logger.info "=======2 #{params['InvId']} ======="
 
     item = BalanceReplenishment.find(notification.item_id)
     Rollbar.info('RobokassaController#paid', item: item,
