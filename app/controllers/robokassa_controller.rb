@@ -1,7 +1,12 @@
 class RobokassaController < ApplicationController
   include OffsitePayments::Integrations::Robokassa
 
-  skip_before_action :verify_authenticity_token
+  skip_before_action(
+    :verify_authenticity_token,
+    :authenticate,
+    :configure_api,
+    :store_after_sign_in_location
+  )
 
   # Robokassa call this action after transaction
   def paid
@@ -31,7 +36,7 @@ class RobokassaController < ApplicationController
 
   rescue => e
     Rollbar.error(e)
-    item.failed!
+    item.try(:failed!)
     on_payment_failed
   end
 
