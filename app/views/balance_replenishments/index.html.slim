@@ -1,12 +1,16 @@
 .container
   h1 Движение средств на лицевом счёте
-  = paginate @balance_changes
-  table.table.table-bordered
-    caption Всего: #{current_account.balance_replenishments.count}
-    thead
-      tr
-        th Дата
-        th Операция
-        th Сумма
-        th Сальдо
-    tbody = render partial: @balance_changes
+  - if @balance_changes.present?
+    = paginate @balance_changes
+    table.table.table-bordered
+      caption Всего: #{current_account.balance_replenishments.paid.count}
+      thead
+        tr
+          th Дата
+          th Операция
+          th Сумма
+          th Сальдо
+      tbody = render partial: @balance_changes
+    = paginate @balance_changes
+  - else
+    |На вашем счёте нет средств

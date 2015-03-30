@@ -35,7 +35,7 @@ class Account < ActiveRecord::Base
 
   def balance(date = nil)
     date ||= DateTime.current
-    balance_replenishments.before_date(date).sum(:amount)
+    balance_replenishments.paid.before_date(date).sum(:amount)
   end
 
   def insales_account
