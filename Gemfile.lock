@@ -43,6 +43,7 @@ PATH
       parallel
       rails (~> 4.1.0)
       responders
+      rollbar
       sidekiq
       sinatra
       slim-rails
@@ -184,6 +185,8 @@ GEM
       redis (~> 3.0, >= 3.0.4)
     responders (1.1.2)
       railties (>= 3.2, < 4.2)
+    rollbar (1.4.4)
+      multi_json (~> 1.3)
     rspec-core (2.14.8)
     rspec-expectations (2.14.5)
       diff-lcs (>= 1.1.3, < 2.0)
