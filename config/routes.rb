@@ -30,9 +30,9 @@ Rails.application.routes.draw do
   resources :balance_replenishments, only: [:index, :new, :create]
 
   scope 'robokassa' do
-    get 'result' => 'robokassa#paid', as: :robokassa_paid # to handle Robokassa push request
-    get 'success' => 'robokassa#success', as: :robokassa_success # to handle Robokassa success redirect
-    get 'fail' => 'robokassa#fail', as: :robokassa_fail # to handle Robokassa fail redirect
+    post 'result' => 'robokassa#paid', as: :robokassa_paid # to handle Robokassa push request
+    post 'success' => 'robokassa#success', as: :robokassa_success # to handle Robokassa success redirect
+    post 'fail' => 'robokassa#fail', as: :robokassa_fail # to handle Robokassa fail redirect
   end
 
   get "/pages/*id" => 'pages#show', format: false

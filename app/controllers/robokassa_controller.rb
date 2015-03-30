@@ -1,5 +1,5 @@
 class RobokassaController < ApplicationController
-  include OffsitePayments::Integrations::Robokassa
+  include OffsitePayments::Integrations
 
   skip_before_action(
     :verify_authenticity_token,
@@ -11,6 +11,10 @@ class RobokassaController < ApplicationController
   # Robokassa call this action after transaction
   def paid
     notification = Robokassa::Notification.new(request.raw_post, secret: ENV['ROBOKASSA_PASSWORD2'])
+    Rails.logger.info "=======0 #{request.raw_post} ======="
+    Rails.logger.info "=======1 #{notification.item_id.inspect} ======="
+    Rails.logger.info "=======2 #{params['InvId']} ======="
+
     item = BalanceReplenishment.find(notification.item_id)
     Rollbar.info('RobokassaController#paid', item: item,
                                              notification: notification)
@@ -35,6 +39,7 @@ class RobokassaController < ApplicationController
     end
 
   rescue => e
+    Rails.logger.info "=== #{e.message} #{e.backtrace} ==="
     Rollbar.error(e)
     item.try(:failed!)
     on_payment_failed
