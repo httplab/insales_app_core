@@ -4,5 +4,6 @@
       .line[class="alert alert-#{name.to_sym == :notice ? 'success' : 'danger'}"]
         = link_to '#', class: 'close', data: { dismiss: 'alert' } do
           '&times;
-        = content_tag :div, msg, id: "flash_#{name}"
+        = content_tag :div, id: "flash_#{name}"
+          == msg
 
