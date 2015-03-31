@@ -2,6 +2,7 @@ class InsalesAppCore::AppMenu::MenuItem
   attr_accessor :submenu
   attr_accessor :home
   attr_accessor :active
+  attr_reader :active_regex
 
   alias_method :home?, :home
   alias_method :active?, :active
@@ -15,6 +16,9 @@ class InsalesAppCore::AppMenu::MenuItem
 
     if path_params.is_a? String
       self.path = path_params
+    elsif path_params.is_a? Hash
+      self.path = path_params[:path]
+      @active_regex = path_params[:active_regex]
     end
   end
 

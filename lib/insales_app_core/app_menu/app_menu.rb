@@ -30,6 +30,8 @@ class InsalesAppCore::AppMenu
           # Это условие нужно для того, чтобы домик (root_path) не подсвечивался
           # когда выбраны всякие разные другие пункты.
           path == item.clean_path
+        elsif item.active_regex
+          item.active_regex =~ path
         else
           path.index(item.clean_path) == 0
         end

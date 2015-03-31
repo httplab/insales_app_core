@@ -1,5 +1,8 @@
 .container
   h1 Движение средств на лицевом счёте
+
+  = link_to 'Пополнить баланс', new_balance_income_path, class: 'btn btn-default'
+
   - if @balance_changes.present?
     = paginate @balance_changes
     table.table.table-bordered
