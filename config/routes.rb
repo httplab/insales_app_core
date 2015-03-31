@@ -27,7 +27,8 @@ Rails.application.routes.draw do
     root to: redirect('/admin/accounts')
   end
 
-  resources :balance_replenishments, only: [:index, :new, :create]
+  resources :balance_incomes, only: [:new, :create]
+  resources :balance_changes, only: :index
 
   scope 'robokassa' do
     post 'result' => 'robokassa#paid', as: :robokassa_paid # to handle Robokassa push request

@@ -1,15 +1,21 @@
-class BalanceReplenishment < ActiveRecord::Base
-  DEFAULT_AMOUNT = 1000
+class BalanceChange < ActiveRecord::Base
   belongs_to :account
 
   validates :account, :amount, presence: true
-  validates :amount, numericality: { greater_than: 0 }
 
   scope :paid, -> { where('paid_at IS NOT NULL') }
   scope :failed, -> { where('failed_at IS NOT NULL') }
   scope :pending, -> { where(paid_at: nil).where(failed_at: nil) }
   scope :before_date, ->(date) { where('created_at <= ?', date) }
   scope :sorted_desc, -> { order('created_at DESC') }
+
+  def income?
+    amount > 0
+  end
+
+  def outcome?
+    amount < 0
+  end
 
   def pending?
     !paid? && !failed?

@@ -15,4 +15,3 @@ gem 'rspec-rails'
 gem 'factory_girl_rails', require: false
 gem 'faker'
 gem 'pg'
-

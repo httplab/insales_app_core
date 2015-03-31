@@ -30,7 +30,7 @@ ru:
     pending: не оплачен
     paid: оплачен
 
-  balance_replenishments:
+  balance_incomes:
     new:
       amount_hint: Сумма будет округлена до целого числа
       submit: Пополнить счет
@@ -92,5 +92,5 @@ ru:
         financial_status: Статус оплаты
         delivery_description: Способ доставки
         client_name: Клиент
-      balance_replenishment:
+      balance_change:
         amount: Сумма

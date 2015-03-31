@@ -1,0 +1,9 @@
+tr
+  td = I18n.l balance_change.created_at, format: :short
+  td
+    - if balance_change.income?
+      .income поступление на счет
+    - else
+      .outcome списание со счета
+  td = render_currency balance_change.amount
+  td = render_currency current_account.balance(balance_change.created_at)

@@ -17,7 +17,9 @@ class Account < ActiveRecord::Base
   has_many :product_fields
   has_many :domains
   has_one :main_domain, ->{where(main: true)}, class_name: 'Domain'
-  has_many :balance_replenishments
+  has_many :balance_changes
+  has_many :balance_incomes
+  has_many :balance_outcomes
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
@@ -35,7 +37,7 @@ class Account < ActiveRecord::Base
 
   def balance(date = nil)
     date ||= DateTime.current
-    balance_replenishments.paid.before_date(date).sum(:amount)
+    balance_changes.paid.before_date(date).sum(:amount)
   end
 
   def insales_account

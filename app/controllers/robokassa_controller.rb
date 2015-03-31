@@ -78,10 +78,10 @@ class RobokassaController < ApplicationController
   end
 
   def on_success
-    redirect_to new_balance_replenishment_path, flash: { notice: t('robokassa.payment_success') }
+    redirect_to new_balance_income_path, flash: { notice: t('robokassa.payment_success') }
   end
 
   def on_failed
-    redirect_to new_balance_replenishment_path, flash: { alert: t('robokassa.payment_fail') }
+    redirect_to new_balance_income_path, flash: { alert: t('robokassa.payment_fail') }
   end
 end
