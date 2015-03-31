@@ -90,6 +90,6 @@ module InsalesAppCoreHelper
   end
 
   def render_currency(number)
-    number_to_currency(number, unit: "руб.", separator: ".", delimiter: " ", format: "%n %u")
+    number_to_currency(number)
   end
 end

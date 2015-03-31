@@ -12,7 +12,7 @@ class RobokassaController < ApplicationController
   def paid
     notification = Robokassa::Notification.new(request.raw_post, secret: ENV['ROBOKASSA_PASSWORD2'])
 
-    item = BalanceReplenishment.find(notification.item_id)
+    item = BalanceIncome.find(notification.item_id)
     Rollbar.info('RobokassaController#paid', item: item,
                                              notification: notification)
 
@@ -49,7 +49,7 @@ class RobokassaController < ApplicationController
       raise 'Robokassa notification acknowledge fail' unless notification.acknowledge
     end
 
-    item = BalanceReplenishment.find(notification.item_id)
+    item = BalanceIncome.find(notification.item_id)
 
     if item.paid?
       Rollbar.info("Robokassa success!", item: item,
@@ -64,7 +64,7 @@ class RobokassaController < ApplicationController
   # Robokassa redirect user to this action if it’s not
   def fail
     notification = Robokassa::Notification.new(request.raw_post)
-    item = BalanceReplenishment.find(notification.item_id)
+    item = BalanceIncome.find(notification.item_id)
     item.failed!
 
     Rollbar.info("Payment failed!", item: item, notification: notification)
