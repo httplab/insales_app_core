@@ -99,13 +99,13 @@ class Account < ActiveRecord::Base
 
   # Время последней синхронизации
   def last_sync_date
-    arr = [:orders, :products, :clients].map { |m| send("#{m}_last_sync") }
+    arr = InsalesAppCore::Synchronization.synced_entities_with_sync_options.map { |m| send("#{m}_last_sync") }
     # Если по какому-то из ентити синхронизации не было, считаем, что ее не было вообще.
     return nil if arr.index(nil)
     arr.map { |m| DateTime.parse(m) }.max
   end
 
-  [:orders, :products, :clients, :collections].each do |ent|
+  InsalesAppCore::Synchronization.synced_entities_with_sync_options.each do |ent|
     define_method ("#{ent}_last_sync") do
       (sync_settings || {})[ent.to_s]
     end

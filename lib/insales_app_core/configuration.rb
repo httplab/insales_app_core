@@ -9,6 +9,10 @@ module InsalesAppCore
 
     attr_accessor :sync_observers
 
+    def synced_entities
+      @sync_options.select{|k,v| v}.keys
+    end
+
     def sync_enabled?
       @sync_options && @sync_options.any?{|k,v| v}
     end
