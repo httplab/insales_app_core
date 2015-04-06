@@ -2,5 +2,6 @@
 
 FactoryGirl.define do
   factory :order_line do
+    insales_id
   end
 end
