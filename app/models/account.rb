@@ -105,7 +105,7 @@ class Account < ActiveRecord::Base
     arr.map { |m| DateTime.parse(m) }.max
   end
 
-  InsalesAppCore::Synchronization.synced_entities_with_sync_options.each do |ent|
+  InsalesAppCore::Synchronization.entities_with_sync_options.each do |ent|
     define_method ("#{ent}_last_sync") do
       (sync_settings || {})[ent.to_s]
     end
