@@ -652,7 +652,7 @@ module InsalesAppCore
       # Методы для оповещения наблюдателей
       def update_event(entity, remote_entity = nil)
         changed
-        changes = nil
+        changes = {}
 
         if entity.new_record? || entity.changed?
           type = entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED
@@ -661,7 +661,7 @@ module InsalesAppCore
           type = ENTITY_INTACT
         end
 
-        notify_observers(type, entity, remote_entity, account_id)
+        notify_observers(type, entity, remote_entity, changes, account_id)
 
         res = yield if block_given?
 
