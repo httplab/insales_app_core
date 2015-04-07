@@ -23,7 +23,10 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    resources :accounts, only: :index
+    resources :accounts, only: :index do
+      post :sign_in, on: :member
+    end
+
     root to: redirect('/admin/accounts')
   end
 

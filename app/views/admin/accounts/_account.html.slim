@@ -1,7 +1,7 @@
 tr
   td
     = account.insales_subdomain
-    ' 
+    '
     span.badge = I18n.t("account_active.#{!account.deleted}")
   td
     ul.list-group
@@ -26,3 +26,5 @@ tr
       = I18n.l(account.last_sync_date, format: :long)
     - else
       'Не синхронизировано
+  td
+    = link_to 'Войти', sign_in_admin_account_path(account), method: :post
