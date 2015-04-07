@@ -9,7 +9,6 @@ FactoryGirl.define do
     registered false
     subscribe true
     bonus_points 0
-    client_group_id 0
 
     trait :registered do
       registered true
