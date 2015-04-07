@@ -7,16 +7,18 @@ module InsalesAppCore
       include Observable
       include ::InsalesAppCore::Synchronization::SyncMethods
 
-      ENTITY_INTACT = 0
-      ENTITY_CREATED = 1
-      ENTITY_MODIFIED = 2
-      ENTITY_DELETED = 3
-      WILL_WAIT_FOR = 4
-      STAGE = 5
-      END_SYNC = 6
-      REQUEST = 7
-      BEGIN_SYNC = 8
-      ERROR = 9
+      ENTITY_INTACT        =  0
+      ENTITY_CREATED       =  1
+      ENTITY_MODIFIED      =  2
+      ENTITY_DELETED       =  3
+      WILL_WAIT_FOR        =  4
+      STAGE                =  5
+      END_SYNC             =  6
+      REQUEST              =  7
+      BEGIN_SYNC           =  8
+      ERROR                =  9
+      ENTITY_AFTER_CREATE  = 10
+      ENTITY_AFTER_UPDATE  = 11
 
       DEFAULT_SYNC_OPTIONS = {
         categories:              false,
@@ -66,8 +68,9 @@ module InsalesAppCore
 
         remote_domains.each do |remote_domain|
           local_domain = Domain.update_or_create_by_insales_entity(remote_domain, account_id: account_id)
-          update_event(local_domain, remote_domain)
-          local_domain.save!(validate: false)
+          update_event(local_domain, remote_domain) do
+            local_domain.save!(validate: false)
+          end
         end
 
 
@@ -87,8 +90,10 @@ module InsalesAppCore
 
         remote_categories.each do |remote_category|
           local_category = Category.update_or_create_by_insales_entity(remote_category, account_id: account_id)
-          update_event(local_category, remote_category)
-          local_category.save!(validate: false)
+
+          update_event(local_category, remote_category) do
+            local_category.save!(validate: false)
+          end
         end
 
         local_categories = Category.where(account_id: account_id)
@@ -113,8 +118,10 @@ module InsalesAppCore
           begin
             remote_ids << remote_property.id
             local_property = Property.update_or_create_by_insales_entity(remote_property, account_id: account_id)
-            update_event(local_property, remote_property)
-            local_property.save!(validate: false)
+
+            update_event(local_property, remote_property) do
+              local_property.save!(validate: false)
+            end
           rescue => ex
             puts ex.message
             puts ex.backtrace
@@ -143,8 +150,10 @@ module InsalesAppCore
 
         remote_product_fields.each do |remote_product_field|
           local_product_field = ProductField.update_or_create_by_insales_entity(remote_product_field, account_id: account_id)
-          update_event(local_product_field, remote_product_field)
-          local_product_field.save!(validate: false)
+
+          update_event(local_product_field, remote_product_field) do
+            local_product_field.save!(validate: false)
+          end
         end
 
         remote_product_fields_ids = remote_product_fields.map(&:id)
@@ -171,18 +180,18 @@ module InsalesAppCore
           page_result.each do |remote_product|
             begin
               local_product = Product.update_or_create_by_insales_entity(remote_product, account_id: account_id)
-              update_event(local_product, remote_product)
-              local_product.save!(validate: false)
+
+              update_event(local_product, remote_product) do
+                local_product.save!(validate: false)
+              end
+
               sync_variants(remote_product)
               sync_images(remote_product)
               sync_characteristics(remote_product, local_product)
               sync_product_field_values(remote_product)
             rescue => ex
-              puts ex.message
-              if local_product
-                p local_product
-                p local_product.attributes
-              end
+              changed
+              notify_observers(ERROR, ex, local_product, account_id)
             end
           end
         end
@@ -236,8 +245,10 @@ module InsalesAppCore
         remote_product_field_values.each do |rpfv|
           begin
             lpfv = ProductFieldValue.update_or_create_by_insales_entity(rpfv, insales_product_id: remote_product.id)
-            update_event(lpfv, rpfv)
-            lpfv.save!(validate: false)
+
+            update_event(lpfv, rpfv) do
+              lpfv.save!(validate: false)
+            end
           rescue
             p rpfv
             p lpfv
@@ -263,8 +274,10 @@ module InsalesAppCore
         remote_variants.each do |remote_variant|
           begin
             local_variant = Variant.update_or_create_by_insales_entity(remote_variant, account_id: account_id, insales_product_id: remote_product.id)
-            update_event(local_variant, remote_variant)
-            local_variant.save!(validate: false)
+
+            update_event(local_variant, remote_variant) do
+              local_variant.save!(validate: false)
+            end
           rescue => ex
             puts ex.message
             puts ex.backtrace
@@ -280,8 +293,10 @@ module InsalesAppCore
         remote_images.each do |remote_image|
           begin
             local_image = Image.update_or_create_by_insales_entity(remote_image, account_id: account_id, insales_product_id: remote_product.id)
-            update_event(local_image, remote_image)
-            local_image.save!(validate: false)
+
+            update_event(local_image, remote_image) do
+              local_image.save!(validate: false)
+            end
           rescue => ex
             puts ex.message
             puts remote_image.inspect
@@ -292,6 +307,7 @@ module InsalesAppCore
 
         if remote_ids.any?
           deleted = Image.where('account_id = ? AND insales_product_id = ? AND insales_id NOT IN (?)', account_id, remote_product.id, remote_ids).delete_all
+
           if deleted > 0
             changed
             notify_observers(ENTITY_DELETED, deleted, nil, account_id)
@@ -312,8 +328,10 @@ module InsalesAppCore
             if local_characteristic.nil?
               local_characteristic =  Characteristic.update_or_create_by_insales_entity(remote_characteristic, account_id: account_id)
               @characteristics_cache[remote_characteristic.id] = local_characteristic
-              update_event(local_characteristic, remote_characteristic)
-              local_characteristic.save!(validate: false)
+
+              update_event(local_characteristic, remote_characteristic) do
+                local_characteristic.save!(validate: false)
+              end
             end
 
             product_characteristics_ids << local_characteristic.id
@@ -334,8 +352,10 @@ module InsalesAppCore
         remote_ids = remote_fields.map(&:id)
         remote_fields.each do |remote_field|
           local_field = Field.update_or_create_by_insales_entity(remote_field, account_id: account_id)
-          update_event(local_field, remote_field)
-          local_field.save!(validate: false)
+
+          update_event(local_field, remote_field) do
+            local_field.save!(validate: false)
+          end
         end
 
         if remote_ids.any?
@@ -398,8 +418,9 @@ module InsalesAppCore
           local_order.cookies = remote_order.cookies.attributes
         end
 
-        update_event(local_order, remote_order)
-        local_order.save!(validate: false)
+        update_event(local_order, remote_order) do
+          local_order.save!(validate: false)
+        end
 
         sync_fields_values(remote_order.fields_values, remote_order.id)
         sync_order_lines(remote_order.order_lines, remote_order.id)
@@ -426,8 +447,10 @@ module InsalesAppCore
 
           local_fields_value = FieldsValue.update_or_create_by_insales_entity(remote_fields_value,
             account_id: account_id, value: value, insales_owner_id: insales_owner_id)
-          update_event(local_fields_value, remote_fields_value)
-          local_fields_value.save!(validate: false)
+
+          update_event(local_fields_value, remote_fields_value) do
+            local_fields_value.save!(validate: false)
+          end
         end
 
         if remote_ids.any?
@@ -449,8 +472,10 @@ module InsalesAppCore
           begin
             local_order_line = OrderLine.update_or_create_by_insales_entity(remote_order_line,
               account_id: account_id, insales_order_id: insales_order_id)
-            update_event(local_order_line, remote_order_line)
-            local_order_line.save!(validate: false)
+
+            update_event(local_order_line, remote_order_line)do
+              local_order_line.save!(validate: false)
+            end
           rescue => ex
             changed
             notify_observers(ERROR, ex, account_id)
@@ -504,8 +529,11 @@ module InsalesAppCore
         end
 
         local_client = Client.update_or_create_by_insales_entity(remote_client, account_id: account_id)
-        update_event(local_client, remote_client)
-        local_client.save!(validate: false)
+
+        update_event(local_client, remote_client) do
+          local_client.save!(validate: false)
+        end
+
         local_client
       rescue => ex
         puts ex.message
@@ -523,8 +551,10 @@ module InsalesAppCore
 
         remote_collections.each do |remote_collection|
           local_collection = Collection.update_or_create_by_insales_entity(remote_collection, account_id: account_id)
-          update_event(local_collection)
-          local_collection.save!(validate: false)
+
+          update_event(local_collection) do
+            local_collection.save!(validate: false)
+          end
         end
 
         if updated_since.nil?
@@ -595,10 +625,28 @@ module InsalesAppCore
       # Методы для оповещения наблюдателей
       def update_event(entity, remote_entity = nil)
         changed
+        changes = nil
+
         if entity.new_record? || entity.changed?
-          notify_observers(entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED, entity, remote_entity, account_id)
+          type = entity.new_record? ? ENTITY_CREATED : ENTITY_MODIFIED
+          changes = entity.changes.clone
         else
-          notify_observers(ENTITY_INTACT, entity, remote_entity, account_id)
+          type = ENTITY_INTACT
+        end
+
+        notify_observers(type, entity, remote_entity, account_id)
+
+        res = yield if block_given?
+
+        return unless res
+
+        case type
+        when ENTITY_MODIFIED
+          changed
+          notify_observers(ENTITY_AFTER_UPDATE, entity, remote_entity, changes, account_id)
+        when ENTITY_CREATED
+          changed
+          notify_observers(ENTITY_AFTER_CREATE, entity, remote_entity, changes, account_id)
         end
       end
 

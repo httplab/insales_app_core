@@ -5,6 +5,8 @@ module InsalesAppCore::Synchronization::Observers
     ACTION_NAMES = {
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED => 'CREATED',
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED => 'MODIFIED',
+      ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_AFTER_CREATE => 'AFTER CREATE',
+      ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_AFTER_UPDATE => 'AFTER UPDATE',
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_DELETED => 'DELETED',
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_INTACT => 'INTACT',
       ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR => 'WILL WAIT FOR',
@@ -18,6 +20,8 @@ module InsalesAppCore::Synchronization::Observers
     ACTION_COLORS = {
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_CREATED => 'green',
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_MODIFIED => 'yellow',
+      ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_AFTER_CREATE => 'light_green',
+      ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_AFTER_UPDATE => 'light_yellow',
       ::InsalesAppCore::Synchronization::Synchronizer::ENTITY_DELETED => 'red',
       ::InsalesAppCore::Synchronization::Synchronizer::WILL_WAIT_FOR => 'red',
       ::InsalesAppCore::Synchronization::Synchronizer::REQUEST => 'blue',
