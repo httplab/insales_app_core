@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 describe Account do
+  it { should have_many(:client_groups) }
+  it { should have_many(:clients) }
+
   let(:account) { Account.new }
   subject { account }
 

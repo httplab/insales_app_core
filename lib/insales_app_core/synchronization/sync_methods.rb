@@ -35,6 +35,7 @@ module InsalesAppCore
 
           sync_collects
           sync_fields
+          sync_client_groups
 
           ls = @account.clients_last_sync if recent
           sync_clients(ls)

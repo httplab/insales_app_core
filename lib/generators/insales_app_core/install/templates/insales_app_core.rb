@@ -21,6 +21,7 @@ InsalesAppCore.setup do |config|
     order_lines:             false,
     shipping_addresses:      false,
     clients:                 false,
+    client_groups:           false,
     product_fields:          false,
     product_field_values:    false,
     domains:                 false

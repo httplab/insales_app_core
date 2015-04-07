@@ -35,6 +35,7 @@ module InsalesAppCore
         order_lines:             false,
         shipping_addresses:      false,
         clients:                 false,
+        client_groups:           false,
         product_fields:          false,
         product_field_values:    false,
         domains:                 false
@@ -106,6 +107,32 @@ module InsalesAppCore
             local_category.delete
             next
           end
+        end
+      end
+
+      def sync_client_groups
+        return if !@sync_options[:client_groups]
+        stage("Synchroniznig client_groups #{@account.insales_subdomain}")
+        remote_client_groups = safe_api_call{InsalesApi::ClientGroup.all}
+
+        remote_client_groups.each do |remote_client_group|
+          local_client_group = ClientGroup.update_or_create_by_insales_entity(remote_client_group, account_id: account_id)
+
+          update_event(local_client_group, remote_client_group) do
+            local_client_group.save!(validate: false)
+          end
+        end
+
+        remote_client_group_ids = remote_client_groups.map(&:id)
+        local_client_groups_to_delete = @account.client_groups
+          .where
+          .not(insales_id: remote_client_group_ids)
+
+        deleted = local_client_groups_to_delete.delete_all
+
+        if deleted > 0
+          changed
+          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
         end
       end
 
