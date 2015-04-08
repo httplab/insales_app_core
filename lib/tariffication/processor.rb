@@ -45,6 +45,10 @@ module Tariffication
       get_period_start
     end
 
+    def period_start_datetime
+      DateTime.parse(get_period_start) if get_period_start.present?
+    end
+
     protected
 
     def build_actions(actions)
