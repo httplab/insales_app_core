@@ -22,6 +22,7 @@ html
                 = image_tag 'insales_app_core/insales_logo.png'
                 | Бэкофис
           ul.nav.navbar-nav.navbar-right
+            = render 'shared/navbar/custom_info'
             li: p.navbar-text = current_account.insales_subdomain
             li = link_to 'Выйти', session_path, method: :delete
 

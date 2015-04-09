@@ -4,7 +4,8 @@ module InsalesAppCore
       extend ActiveSupport::Concern
 
       included do
-        before_filter :store_after_sign_in_location, :authenticate, :configure_api
+        before_action :store_after_sign_in_location, :authenticate, :configure_api
+        prepend_before_action :authenticate, :configure_api
 
         helper_method :current_account, :current_insales_app, :logged_in?
       end
