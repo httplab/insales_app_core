@@ -561,6 +561,7 @@ module InsalesAppCore
           local_client.save!(validate: false)
         end
 
+        sync_fields_values(remote_client.fields_values, remote_client.id)
         local_client
       rescue => ex
         puts ex.message

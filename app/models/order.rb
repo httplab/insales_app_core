@@ -6,7 +6,7 @@ class Order < ActiveRecord::Base
 
   belongs_to :account
   belongs_to :client, foreign_key: :insales_client_id, primary_key: :insales_id
-  has_many :fields_values ,-> {joins(:field).where('fields.destiny = 3') }, class_name: FieldsValue, foreign_key: :insales_owner_id, dependent: :destroy, primary_key: :insales_id
+  has_many :fields_values ,-> {joins(:field).where('fields.destiny = ?', Field::DESTINY_ORDER) }, class_name: FieldsValue, foreign_key: :insales_owner_id, dependent: :destroy, primary_key: :insales_id
   has_many :order_lines, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_order_id
   has_one :shipping_address, class_name: 'Order::ShippingAddress', dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_order_id
 
