@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: git@github.com:httplab/insales_api.git
-  revision: 07523d20b667cae244320ce6f822fa0d7286031f
+  revision: b4ec85949740c82d6d24e2dc6fe56ebaca9411e5
   branch: master
   specs:
     insales_api (0.1.0.pre)
@@ -140,7 +140,7 @@ GEM
       treetop (~> 1.4.8)
     mime-types (1.25.1)
     mini_portile (0.6.2)
-    minitest (5.5.1)
+    minitest (5.6.0)
     money (6.5.1)
       i18n (>= 0.6.4, <= 0.7.0)
     multi_json (1.9.2)
@@ -242,7 +242,7 @@ GEM
     styx (0.1.2)
     temple (0.7.5)
     thor (0.19.1)
-    thread_safe (0.3.4)
+    thread_safe (0.3.5)
     tilt (1.4.1)
     timers (4.0.1)
       hitimes
