@@ -21,9 +21,16 @@ class SessionsController < ApplicationController
   end
 
   def autologin
-    if current_insales_app && current_insales_app.authorize(params[:token])
+    unless current_insales_app
+      flash[:error] = "Не удалось выполнить вход. Убедитесь, что адрес магазина указан правильно."
+      redirect_to new_session_path
+      return
+    end
+
+    if current_insales_app.authorize(params[:token])
       redirect_to root_path
     else
+      flash[:error] = "Не удалось выполнить вход. Неверный токен авторизации."
       redirect_to new_session_path
     end
   end
