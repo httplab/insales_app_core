@@ -21,6 +21,7 @@ class Account < ActiveRecord::Base
   has_many :balance_changes
   has_many :balance_incomes
   has_many :balance_outcomes
+  has_many :js_tag_bindings
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
@@ -129,6 +130,14 @@ class Account < ActiveRecord::Base
     else
       self.deleted_at = nil
     end
+  end
+
+  def ensure_js_tag(label, type, text)
+    JsTagBinding.ensure_js_tag(self, label, type, text)
+  end
+
+  def remove_js_tag(label)
+    JsTagBinding.remove_js_tag(self, label)
   end
 end
 
