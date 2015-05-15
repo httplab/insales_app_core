@@ -25,16 +25,19 @@ class Account < ActiveRecord::Base
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
+  scope :active,   -> { where(deleted: false) }
+  scope :inactive, -> { where(deleted: true)  }
+
   # TODO: Более оптимально вычислять был ли засинкан аккаунт
   def self.for_sync
-    where(deleted: false).to_ary.select { |a| a.initial_sync_completed? }
+    active.to_ary.select { |a| a.initial_sync_completed? }
   end
 
   def self.installed?(params)
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = InsalesApi::App.password_by_token(params[:token])
 
-    Account.exists?(insales_subdomain: shop, insales_password: password, deleted: false)
+    Account.active.exists?(insales_subdomain: shop, insales_password: password)
   end
 
   def balance(date = nil)
@@ -52,7 +55,7 @@ class Account < ActiveRecord::Base
     password = InsalesApi::App.password_by_token(params[:token])
     insales_id = params[:insales_id]
 
-    acc = Account.where(insales_id: insales_id, insales_subdomain: shop, deleted: true).first
+    acc = Account.inactive.where(insales_id: insales_id, insales_subdomain: shop).first
 
     if acc.present?
       acc.update_attributes(insales_password: password, deleted: false, last_install_date: DateTime.current)
@@ -71,7 +74,7 @@ class Account < ActiveRecord::Base
     shop = InsalesApi::App.prepare_shop(params[:shop])
     password = params[:token]
 
-    a = Account.find_by!(insales_subdomain: shop, insales_password: password, deleted: false)
+    a = Account.active.find_by!(insales_subdomain: shop, insales_password: password)
     a.deleted = true
     a.save!
   end
@@ -132,8 +135,12 @@ class Account < ActiveRecord::Base
     end
   end
 
-  def ensure_js_tag(label, type, text)
-    JsTagBinding.ensure_js_tag(self, label, type, text)
+  def ensure_js_tag(label, text, force = false)
+    JsTagBinding.ensure_js_tag(self, label, text, force)
+  end
+
+  def ensure_js_include_tag(label, url, force = false)
+    JsTagBinding.ensure_js_include_tag(self, label, url, force)
   end
 
   def remove_js_tag(label)
