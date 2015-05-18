@@ -19,7 +19,7 @@ class JsTagBinding < ActiveRecord::Base
 
   def self.ensure_js_include_tag(account, label, url, test: false, force: false)
     text = include_script(url)
-    ensure_js_tag(account, label, text, force)
+    ensure_js_tag(account, label, text, test: test, force: force)
   end
 
   def self.remove_js_tag(account, label)
