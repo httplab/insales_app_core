@@ -135,12 +135,12 @@ class Account < ActiveRecord::Base
     end
   end
 
-  def ensure_js_tag(label, text, force = false)
-    JsTagBinding.ensure_js_tag(self, label, text, force)
+  def ensure_js_tag(label, text, test: false, force: false)
+    JsTagBinding.ensure_js_tag(self, label, text, test: test, force: force)
   end
 
-  def ensure_js_include_tag(label, url, force = false)
-    JsTagBinding.ensure_js_include_tag(self, label, url, force)
+  def ensure_js_include_tag(label, url, test: false, force: false)
+    JsTagBinding.ensure_js_include_tag(self, label, url, test: test, force: force)
   end
 
   def remove_js_tag(label)

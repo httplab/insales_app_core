@@ -9,15 +9,15 @@ class JsTagBinding < ActiveRecord::Base
 
   belongs_to :account
 
-  def self.ensure_js_tag(account, label, text, force = false)
+  def self.ensure_js_tag(account, label, text, test: false, force: false)
     binding =
       account.js_tag_bindings.where(label: label)
       .first_or_initialize
 
-    binding.ensure_js_tag(text, force = false)
+    binding.ensure_js_tag(text, test, force)
   end
 
-  def self.ensure_js_include_tag(account, label, url, force = false)
+  def self.ensure_js_include_tag(account, label, url, test: false, force: false)
     text = include_script(url)
     ensure_js_tag(account, label, text, force)
   end
@@ -33,11 +33,14 @@ class JsTagBinding < ActiveRecord::Base
     InsalesApi::JsTag.find(insales_js_tag_id)
   end
 
-  def ensure_js_tag(text, force = false)
+  def ensure_js_tag(text, test = false, force = false)
     new_checksum = Digest::SHA256.new.hexdigest(text)
 
-    if (checksum != new_checksum) || force
-      make_js_tag(text, new_checksum)
+    self.checksum = new_checksum
+    self.test_mode = test
+
+    if checksum_changed? || test_mode_changed? || force
+      make_js_tag(text)
     end
 
     insales_js_tag_id
@@ -71,26 +74,47 @@ class JsTagBinding < ActiveRecord::Base
     <<-HERE
 
       // JsTag by insales_app_core
-      // Application: #{ENV['INSALES_API_KEY']}
+      // Application: #{app_name}
       // Label: #{label}
       // Updated at: #{DateTime.now}
+      #{test_mode ? "// Test mode" : ''}
 
     HERE
   end
 
-  def make_js_tag(text, new_checksum)
-    destroy_js_tag
+  def test_script
+    param_name = "enable_#{app_name}_#{label}_script=true"
+
+    <<-HERE
+      var regex = new RegExp("#{param_name}")
+      var results = regex.exec(location.search);
+      if(results === null) {
+        return null;
+      }
+    HERE
+  end
+
+  def full_text(text)
+    text = text.prepend(test_script) if test_mode
     text = text.prepend(comment)
+    text
+  end
+
+  def app_name
+    ENV['INSALES_API_KEY']
+  end
+
+  def make_js_tag(text)
+    destroy_js_tag
+
     Rails.logger.info("Creating JsTag...")
     account.configure_api
 
-    js_tag_id = InsalesApi::JsTag.create(
+    self.insales_js_tag_id = InsalesApi::JsTag.create(
       type: 'JsTag::TextTag',
-      content: text
+      content: full_text(text)
     ).id
 
-    self.checksum = new_checksum
-    self.insales_js_tag_id = js_tag_id
     self.save
   end
 end
