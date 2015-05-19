@@ -45,7 +45,7 @@ class InsalesAppCore::AccountSetting
   end
 
   def default_value(val = nil, &block)
-    @default_value = val || block
+    @default_value = val.nil? || block
   end
 
   def allowed_values=(val = nil, &block)
