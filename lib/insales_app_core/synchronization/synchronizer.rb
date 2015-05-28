@@ -441,7 +441,7 @@ module InsalesAppCore
           end
         end
 
-        if remote_order.cookies.present?
+        if remote_order.respond_to?(:cookies) && remote_order.cookies.present?
           local_order.cookies = remote_order.cookies.attributes
         end
 
