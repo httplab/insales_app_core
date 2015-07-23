@@ -63,7 +63,7 @@ module InsalesAppCore
       end
 
       def sync_domains
-        return if !@sync_options[:domains]
+        return unless @sync_options[:domains]
         stage("Synchroniznig domains #{@account.insales_subdomain}")
         remote_domains = safe_api_call{InsalesApi::Domain.all}
 
@@ -85,7 +85,7 @@ module InsalesAppCore
       end
 
       def sync_categories
-        return if !@sync_options[:categories]
+        return unless @sync_options[:categories]
         stage("Synchroniznig categories #{@account.insales_subdomain}")
         remote_categories = safe_api_call{InsalesApi::Category.all}
 
@@ -101,7 +101,7 @@ module InsalesAppCore
         remote_categories_ids = remote_categories.map(&:id)
 
         local_categories.each do |local_category|
-          if !remote_categories_ids.include?(local_category.insales_id)
+          unless remote_categories_ids.include?(local_category.insales_id)
             changed
             notify_observers(ENTITY_DELETED, local_category, nil, account_id)
             local_category.delete
@@ -111,7 +111,7 @@ module InsalesAppCore
       end
 
       def sync_client_groups
-        return if !@sync_options[:client_groups]
+        return unless @sync_options[:client_groups]
         stage("Synchroniznig client_groups #{@account.insales_subdomain}")
         remote_client_groups = safe_api_call{InsalesApi::ClientGroup.all}
 
@@ -137,7 +137,7 @@ module InsalesAppCore
       end
 
       def sync_properties
-        return if !@sync_options[:properties]
+        return unless @sync_options[:properties]
         stage("Synchroniznig properties #{@account.insales_subdomain}")
         remote_ids = []
         remote_properties = safe_api_call{InsalesApi::Property.all}
@@ -149,6 +149,8 @@ module InsalesAppCore
             update_event(local_property, remote_property) do
               local_property.save!(validate: false)
             end
+
+            sync_characteristics(remote_property, local_property)
           rescue => ex
             puts ex.message
             puts ex.backtrace
@@ -167,6 +169,21 @@ module InsalesAppCore
             property.delete
           end
         end
+      end
+
+      def sync_characteristics(remote_property, local_property)
+        return unless @sync_options[:characteristics]
+
+        remote_property.characteristics.each do |remote_characteristic|
+          local_characteristic = Characteristic.update_or_create_by_insales_entity(remote_characteristic, insales_property_id: remote_property.id, account_id: account_id)
+
+          update_event(local_characteristic, remote_characteristic) do
+            local_characteristic.save!(validate: false)
+          end
+        end
+
+        remote_ids = remote_property.characteristics.map(&:id)
+        local_property.characteristics.where.not(insales_id: remote_ids).delete_all
       end
 
       def sync_product_fields
@@ -214,7 +231,7 @@ module InsalesAppCore
 
               sync_variants(remote_product)
               sync_images(remote_product)
-              sync_characteristics(remote_product, local_product)
+              sync_product_characteristics(remote_product, local_product)
               sync_product_field_values(remote_product)
             rescue => ex
               changed
@@ -285,7 +302,7 @@ module InsalesAppCore
       end
 
       def sync_variants(remote_product)
-        return if !@sync_options[:variants]
+        return unless @sync_options[:variants]
         remote_variants = remote_product.variants
         remote_ids = remote_variants.map(&:id)
 
@@ -342,8 +359,8 @@ module InsalesAppCore
         end
       end
 
-      def sync_characteristics(remote_product, local_product)
-        return if !@sync_options[:characteristics]
+      def sync_product_characteristics(remote_product, local_product)
+        return unless @sync_options[:characteristics]
 
         @characteristics_cache ||= {}
         product_characteristics_ids = []
@@ -353,7 +370,12 @@ module InsalesAppCore
             local_characteristic = @characteristics_cache[remote_characteristic.id]
 
             if local_characteristic.nil?
-              local_characteristic =  Characteristic.update_or_create_by_insales_entity(remote_characteristic, account_id: account_id)
+              local_characteristic =
+                Characteristic.update_or_create_by_insales_entity(
+                  remote_characteristic,
+                  account_id: account_id,
+                  insales_property_id: remote_characteristic.prefix_options[:property_id]
+                )
               @characteristics_cache[remote_characteristic.id] = local_characteristic
 
               update_event(local_characteristic, remote_characteristic) do
@@ -373,7 +395,7 @@ module InsalesAppCore
       end
 
       def sync_fields
-        return if !@sync_options[:fields]
+        return unless @sync_options[:fields]
         stage("Synchroniznig fields #{@account.insales_subdomain}")
         remote_fields = safe_api_call{InsalesApi::Field.all}
         remote_ids = remote_fields.map(&:id)
@@ -393,7 +415,7 @@ module InsalesAppCore
       end
 
       def sync_orders(updated_since = nil)
-        return if !@sync_options[:orders]
+        return unless @sync_options[:orders]
         @account.orders_last_sync = DateTime.now
         remote_ids = []
         report_stage('orders', updated_since)
@@ -464,7 +486,7 @@ module InsalesAppCore
       end
 
       def sync_fields_values(remote_fields_values, insales_owner_id)
-        return if !@sync_options[:fields_values]
+        return unless @sync_options[:fields_values]
         remote_ids = remote_fields_values.map(&:id)
         remote_fields_values.each do |remote_fields_value|
           # Если в value содержится экземпляр класса InsalesApi::Order::FieldsValue::Value,
@@ -492,7 +514,7 @@ module InsalesAppCore
       end
 
       def sync_order_lines(remote_order_lines, insales_order_id)
-        return if !@sync_options[:order_lines]
+        return unless @sync_options[:order_lines]
         remote_ids = remote_order_lines.map(&:id)
 
         remote_order_lines.each do |remote_order_line|
@@ -520,14 +542,14 @@ module InsalesAppCore
       end
 
       def sync_order_shipping_address(remote_shipping_address, insales_order_id)
-        return if !@sync_options[:shipping_addresses]
+        return unless @sync_options[:shipping_addresses]
         sa = Order::ShippingAddress.update_or_create_by_insales_entity(remote_shipping_address,
           account_id: account_id, insales_order_id: insales_order_id)
         sa.save!(validate: false)
       end
 
       def sync_clients(updated_since = nil)
-        return if !@sync_options[:clients]
+        return unless @sync_options[:clients]
         @account.clients_last_sync = DateTime.now
         report_stage('clients', updated_since)
         remote_ids = []
@@ -571,7 +593,7 @@ module InsalesAppCore
       end
 
       def sync_collections(updated_since = nil)
-        return if !@sync_options[:collections]
+        return unless @sync_options[:collections]
         @account.collections_last_sync = DateTime.now
 
         report_stage('collections', updated_since)
@@ -590,7 +612,7 @@ module InsalesAppCore
           remote_collections_ids = Set.new(remote_collections.map(&:id))
 
           local_collections.each do |local_collection|
-            if !remote_collections_ids.include?(local_collection.insales_id)
+            unless remote_collections_ids.include?(local_collection.insales_id)
               changed
               notify_observers(ENTITY_DELETED, local_collection, account_id)
               local_collection.delete
@@ -603,7 +625,7 @@ module InsalesAppCore
       end
 
       def sync_collects
-        return if !@sync_options[:collects]
+        return unless @sync_options[:collects]
         stage("Synchroniznig collects #{@account.insales_subdomain}")
         remote_pairs = []
 
@@ -636,7 +658,7 @@ module InsalesAppCore
           params = {
             page: page
           }
-          params[:per_page] = page_size if !page_size.nil?
+          params[:per_page] = page_size unless page_size.nil?
           addl_params.delete_if{|k,v| v.nil?}
           params.merge!(addl_params)
           page_result = safe_api_call{type.find(:all, params: params)}
