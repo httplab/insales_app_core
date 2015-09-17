@@ -26,7 +26,7 @@ class Variant < ActiveRecord::Base
       .sort
   end
 
-  def self.delete_orphan_variants
+  def self.delete_orphans
     orphans.delete_all
   end
 
