@@ -1,4 +1,7 @@
 class Variant < ActiveRecord::Base
+  ADDL_PRICE_SET_ATTR_REX = /^price(?<price_id>\d+)=$/
+  ADDL_PRICE_GET_ATTR_REX = /^price(?<price_id>\d+)$/
+
   validates :account_id, :insales_id, :insales_product_id, presence: true
   belongs_to :account
   belongs_to :product, primary_key: :insales_id, foreign_key: :insales_product_id
@@ -6,9 +9,10 @@ class Variant < ActiveRecord::Base
 
   maps_to_insales product_id: :insales_product_id
 
-  ADDL_PRICE_SET_ATTR_REX = /^price(?<price_id>\d+)=$/
-  ADDL_PRICE_GET_ATTR_REX = /^price(?<price_id>\d+)$/
-
+  scope :orphans, -> {
+    joins('LEFT JOIN products ON variants.insales_product_id = products.insales_id')
+      .where('products.insales_id IS null')
+  }
 
   def self.additional_prices_names
     uniq
@@ -20,6 +24,10 @@ class Variant < ActiveRecord::Base
       .uniq
       .map{ |n| "price#{n}" }
       .sort
+  end
+
+  def self.delete_orphan_variants
+    orphans.delete_all
   end
 
   def method_missing(method, *args)

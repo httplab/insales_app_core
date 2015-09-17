@@ -51,6 +51,7 @@ namespace :insales_sync do
           end
         end
       end
+      Variant.delete_orphan_variants
     end
   end
 end
