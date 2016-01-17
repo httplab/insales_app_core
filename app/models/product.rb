@@ -7,7 +7,6 @@ class Product < ActiveRecord::Base
 
   belongs_to :account
 
-
   has_many :variants, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_product_id
   has_many :images, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_product_id
   has_many :collects, dependent: :destroy, primary_key: :insales_id, foreign_key: :insales_product_id
@@ -17,6 +16,8 @@ class Product < ActiveRecord::Base
   has_many :characteristics, through: :product_characteristics
   has_many :product_field_values, primary_key: :insales_id, foreign_key: :insales_product_id,
            dependent: :delete_all
+
+  has_many :properties, through: :characteristics, primary_key: :insales_id, foreign_key: :insales_property_id
 
   maps_to_insales category_id: :insales_category_id
   scope :by_category_id, ->(category_id) { Category.find(category_id).nested_products.order(:category_id) }
