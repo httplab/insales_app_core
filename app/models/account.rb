@@ -22,6 +22,8 @@ class Account < ActiveRecord::Base
   has_many :balance_incomes
   has_many :balance_outcomes
   has_many :js_tag_bindings
+  has_many :option_names
+  has_many :option_values
 
   before_update :set_deleted_at, if: 'deleted_changed?'
 
