@@ -38,7 +38,9 @@ module InsalesAppCore
         client_groups:           false,
         product_fields:          false,
         product_field_values:    false,
-        domains:                 false
+        domains:                 false,
+        option_names:            false,
+        option_values:           false
       }
 
       def initialize(account_id, options = {})
@@ -646,6 +648,52 @@ module InsalesAppCore
 
         if pairs_to_create.any?
           Collect.connection.execute("INSERT INTO collects (insales_collection_id, insales_product_id, account_id) VALUES #{values_clause}")
+        end
+      end
+
+      def sync_option_names
+        return unless @sync_options[:option_names]
+        report_stage('option names')
+
+        remote_option_names = safe_api_call{InsalesApi::OptionName.all}
+
+        remote_option_names.each do |remote_option_name|
+          local_option_name = OptionName.update_or_create_by_insales_entity(remote_option_name, account_id: account_id)
+          update_event(local_option_name, remote_option_name) do
+            local_option_name.save!(validate: false)
+          end
+        end
+
+        remote_option_names_ids = remote_option_names.map(&:id)
+
+        deleted = @account.option_names.where.not(insales_id: remote_option_names_ids).delete_all
+
+        if deleted > 0
+          changed
+          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
+        end
+      end
+
+      def sync_option_values
+        return unless @sync_options[:option_values]
+        report_stage('option values')
+
+        remote_option_values = safe_api_call{InsalesApi::OptionValue.all}
+
+        remote_option_values.each do |remote_option_value|
+          local_option_value = OptionValue.update_or_create_by_insales_entity(remote_option_value, account_id: account_id)
+          update_event(local_option_value, remote_option_value) do
+            local_option_value.save!(validate: false)
+          end
+        end
+
+        remote_option_values_ids = remote_option_values.map(&:id)
+
+        deleted = @account.option_values.where.not(insales_id: remote_option_values_ids).delete_all
+
+        if deleted > 0
+          changed
+          notify_observers(ENTITY_DELETED, deleted, nil, account_id)
         end
       end
 
