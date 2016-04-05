@@ -43,6 +43,9 @@ module InsalesAppCore
           ls = @account.orders_last_sync if recent
           sync_orders(ls)
 
+          sync_option_names
+          sync_option_values
+
           end_sync
         end
       end
